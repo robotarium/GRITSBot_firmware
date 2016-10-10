@@ -3,8 +3,7 @@
  GRITSBot Motor Board class
  
  METHODS:
-    void initialize();
-        Initializes the device. Must be done before device can be used.
+
  NOTES:
  
  EXAMPLES:
@@ -47,12 +46,18 @@
 //------------------------------------------------------------------------------
 // Defines
 //------------------------------------------------------------------------------
-#define I2C_TX_LEN_MOTOR      3
-#define STEPS_PER_REVOLUTION 40
+#define I2C_TX_LEN_MOTOR    3
 
 //------------------------------------------------------------------------------
 // Define motor pins
 //------------------------------------------------------------------------------
+/* Yellow Circuithub robots are     V5 */
+/* Green Seeedstudio robots are     V4 */
+/* Purple Oshpark robots are mostly V3 */
+#define VERSION 4
+
+#if VERSION == 5
+/* Yellow Circuithub robots are V5 */
 /* LED pins */
 #define LED_LEFT_PORT   PORTD
 #define LED_LEFT_PIN        2
@@ -68,8 +73,9 @@
 #define M12_PORT PORTB
 #define M13_PORT PORTB
 #define M14_PORT PORTD
-#define M11_PIN 2 
-#define M12_PIN 1 
+// TODO: for version 5 fix nextStepLeft/Right to move in the correct way fwd, bwd, ccw, cw
+#define M11_PIN 2 // swapped to ensure right directions
+#define M12_PIN 1 // swapped
 #define M13_PIN 0
 #define M14_PIN 7
 
@@ -78,10 +84,43 @@
 #define M22_PORT PORTD
 #define M23_PORT PORTB
 #define M24_PORT PORTB
-#define M21_PIN 6
-#define M22_PIN 5
+#define M21_PIN 6 // swapped
+#define M22_PIN 5 // swapped
 #define M23_PIN 7
 #define M24_PIN 6
+
+#else
+/* Green Seeedstudio robots are V4 */
+/* Two LED pins */
+#define LED_LEFT_PORT   PORTD
+#define LED_LEFT_PIN        4
+#define LED_RIGHT_PORT  PORTD
+#define LED_RIGHT_PIN       4
+
+/* Main board reset pin not available for V4 - define as same as LED pin */
+#define MAINBOARD_RESET_PORT   PORTD
+#define MAINBOARD_RESET_PIN        4
+
+/* v4.0: Motor 1 pin and port definitions */
+#define M11_PORT PORTB
+#define M12_PORT PORTB
+#define M13_PORT PORTB
+#define M14_PORT PORTD
+#define M11_PIN 1
+#define M12_PIN 2
+#define M13_PIN 0
+#define M14_PIN 7
+
+/* v4.0: Motor 2 pin and port definitions */
+#define M21_PORT PORTD
+#define M22_PORT PORTD
+#define M23_PORT PORTB
+#define M24_PORT PORTB
+#define M21_PIN 5
+#define M22_PIN 6
+#define M23_PIN 7
+#define M24_PIN 6
+#endif
 
 class GRITSBotMotor {
     public:
@@ -117,6 +156,7 @@ class GRITSBotMotor {
     void setVelocitiesMax(float vMax, float wMax);
     void setRPS(float rpsLeft, float rpsRight);
     void setRPSMax(float rpsMax);
+    void setStepsPerRevolution(uint16_t steps);
 
     /* LED functions */
     void toggleLeds();
@@ -179,10 +219,11 @@ class GRITSBotMotor {
      * 		wheel base   ... 35 mm
      */
     float rpsMax_;
-    static const float rWheel_ = 0.005;
-    static const float cWheel_ = 0.0314;
-    static const float rTrack_ = 0.0175;
-    static const float cTrack_ = 0.1100;
+    const float rWheel_ = 0.005;
+    const float cWheel_ = 0.0314;
+    const float rTrack_ = 0.0175;
+    const float cTrack_ = 0.1100;
+    uint16_t    stepsPerRevolution_;
 
     /* Velocities */
     float rpsLeft_;

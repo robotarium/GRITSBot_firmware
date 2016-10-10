@@ -56,6 +56,9 @@ void GRITSBotMotor::initialize(uint8_t address) {
   /* Conservative settings */
   //setVelocitiesMax(0.1, 360);
   //setRPSMax(4);
+
+  /* Set initial steps per revolution to 50 */
+  setStepsPerRevolution(50);
 }
 
 //------------------------------------------------------------------------------
@@ -117,19 +120,23 @@ void GRITSBotMotor::setRPS(float rpsLeft, float rpsRight) {
     delayLeft_  = 1E6; /* 1 second delay per step if speed is close to 0 */
     rpsLeft_    = 0.0;
   } else {
-    delayLeft_  = (1000000.0 / (abs(rpsLeft_) * STEPS_PER_REVOLUTION));
+    delayLeft_  = (1000000.0 / (abs(rpsLeft_) * stepsPerRevolution_));
   }
 
   if(abs(rpsRight_) < 1E-4) {
     delayRight_ = 1E6;  /* 1 second delay per step if speed is close to 0 */
     rpsRight_   = 0.0;
   } else {
-    delayRight_ = (1000000.0 / (abs(rpsRight_) * STEPS_PER_REVOLUTION));
+    delayRight_ = (1000000.0 / (abs(rpsRight_) * stepsPerRevolution_));
   }
 }
 
 void GRITSBotMotor::setRPSMax(float rpsMax) {
   rpsMax_ = rpsMax;
+}
+
+void GRITSBotMotor::setStepsPerRevolution(uint16_t steps) {
+  stepsPerRevolution_ = steps;
 }
 
 void GRITSBotMotor::step() {
@@ -240,6 +247,9 @@ void GRITSBotMotor::processI2CMessage(I2CMessage* msg) {
       break;
     case(MSG_SET_RPS_MAX):
       setRPSMax(msg->data_[0].fval);
+      break;
+    case(MSG_SET_STEPS_PER_REV):
+      setStepsPerRevolution(msg->data_[0].fval);
       break;
     case(MSG_DEEP_SLEEP):
       /* NOTE: The microcontroller is put to sleep in the step() function,

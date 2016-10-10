@@ -160,6 +160,7 @@ class GRITSBotMain {
     void setVelocitiesMax(float v, float w);
     void setRPS(float rpsLeft, float rpsRight);
     void setRPSMax(float rpsMax);
+    void setStepsPerRevolution(float steps);
 
     /* Utility functions */
     float map(float x, float inMin, float inMax, float outMin, float outMax);

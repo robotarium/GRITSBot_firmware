@@ -34,8 +34,9 @@
 #define MSG_SET_CALIBRATION_DATA  8
 #define MSG_SET_EEPROM_CELL       9
 #define MSG_SET_MODE              10
-#define MSG_UPDATE_ESTIMATOR      11
-#define MSG_UPDATE_DYNAMICS       12
+#define MSG_SET_STEPS_PER_REV     11
+#define MSG_UPDATE_ESTIMATOR      12
+#define MSG_UPDATE_DYNAMICS       13
 
 /* Individual get messages */
 #define MSG_GET_CURRENT_POSE      20

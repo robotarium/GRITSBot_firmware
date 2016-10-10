@@ -337,6 +337,19 @@ bool GRITSBotMain::processUDPMessage() {
 		      } 
 		      break;
         }
+      case(MSG_SET_STEPS_PER_REV):
+      	{
+      		float steps = 0;
+		      if(JSONGetFloat(root, "steps", steps)) {
+		        /* Update steps per revolution value for the motor 
+             * board's stepper motors */
+						setStepsPerRevolution(steps);
+		      } else {
+		        error = "MSG_SET_STEPS_PER_REV: Failed to parse steps: " + msg;
+				  	sendErrorMessage(error);
+		      } 
+		      break;
+        }
       case(MSG_GET_BATT_VOLT):
       	{
 		      String fields[3] = {"msgType", "vBat", "iBat"};
@@ -871,6 +884,10 @@ void GRITSBotMain::setRPS(float rpsLeft, float rpsRight) {
 
 void GRITSBotMain::setRPSMax(float rpsMax) {
   I2C_->sendMessage(MSG_SET_RPS_MAX, rpsMax, 0.0);
+}
+
+void GRITSBotMain::setStepsPerRevolution(float steps) {
+  I2C_->sendMessage(MSG_SET_STEPS_PER_REV, steps, 0.0);
 }
 
 /* *************************
