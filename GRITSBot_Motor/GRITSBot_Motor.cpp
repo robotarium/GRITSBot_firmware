@@ -50,15 +50,18 @@ void GRITSBotMotor::initialize(uint8_t address) {
 
   /* Set velocity thresholds */
   /* Full speed settings */
-  setVelocitiesMax(0.254, 720);
-  setRPSMax(8);
+  //setVelocitiesMax(0.254, 720);
+  //setRPSMax(8);
 
   /* Conservative settings */
-  //setVelocitiesMax(0.1, 360);
-  //setRPSMax(4);
+  setVelocitiesMax(0.1, 360);
+  setRPSMax(4);
 
   /* Set initial steps per revolution to 50 */
-  setStepsPerRevolution(50);
+  setStepsPerRevolution(STEPS_PER_REVOLUTION);
+
+  /* Set firmware version */
+  setVersion(FIRMWARE_VERSION); 
 }
 
 //------------------------------------------------------------------------------
@@ -198,6 +201,9 @@ void GRITSBotMotor::requestEvent() {
     case(MSG_GET_AVG_CURRENTS):
       i2c_.sendMessage(MSG_GET_AVG_CURRENTS, currentLeftAvg_.getAverage(), 
                                              currentRightAvg_.getAverage());
+      break;
+    case(MSG_GET_FIRMWARE_VERSION):
+      i2c_.sendMessage(MSG_GET_FIRMWARE_VERSION, getVersion(), 0.0);
       break;
     case(MSG_ECHO):
       i2c_.sendMessage(MSG_ECHO, I2CBuffer_.data_[0].fval, 
@@ -709,4 +715,25 @@ void GRITSBotMotor::collectData() {
 
 float GRITSBotMotor::map(float x, float inMin, float inMax, float outMin, float outMax) {
   return (x - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+}
+
+bool GRITSBotMotor::setVersion(uint32_t version) {
+  uint8_t i = EEPROM_writeAnything(FIRMWARE_ADDRESS, version);
+
+  if(i > 0) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+uint32_t GRITSBotMotor::getVersion() {
+  uint32_t version;
+  uint8_t i = EEPROM_readAnything(FIRMWARE_ADDRESS, version);
+  
+  if(i > 0) {
+    return version;
+  } else {
+    return 0;
+  }
 }

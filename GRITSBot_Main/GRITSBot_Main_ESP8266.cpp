@@ -85,6 +85,10 @@ void GRITSBotMain::initialize() {
   /* Set initial mode */
   mode_ = MANUAL_MODE;
 
+  /* Set firmware version */
+  EEPROM.begin(512);
+  setMainBoardVersion(FIRMWARE_VERSION); 
+
   /* Attach interrupt for charge status pin, this has to be done in the 
    * main setup() routine --> see examples/mainboard_basic 
    * 
@@ -371,6 +375,17 @@ bool GRITSBotMain::processUDPMessage() {
 		      String fields[2] = {"msgType", "rpsMax"};
 				  float data[2]    = {MSG_GET_RPS_MAX, sampleMotorBoardRPSMax()};
 				  JSONSendMessage(fields, data, 2);
+		      break;
+        }
+      case(MSG_GET_FIRMWARE_VERSION):
+      	{
+		      String fields[3] = {"msgType", 
+                              "versionMain", 
+                              "versionMotor"};
+				  float data[3]    = {MSG_GET_FIRMWARE_VERSION, 
+                              getMainBoardVersion(),
+                              getMotorBoardVersion()};
+				  JSONSendMessage(fields, data, 3);
 		      break;
         }
       case(MSG_HOST_IP):
@@ -1043,4 +1058,39 @@ void GRITSBotMain::ledOff() {
  ***************************/
 float GRITSBotMain::map(float x, float inMin, float inMax, float outMin, float outMax) {
   return (x - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+}
+
+/* *************************
+ *    VERSIONING FUNCTIONS
+ ***************************/
+bool GRITSBotMain::setMainBoardVersion(uint32_t version) {
+  uint8_t i = EEPROM_writeAnything(FIRMWARE_ADDRESS, version);
+
+  if(i > 0) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+uint32_t GRITSBotMain::getMainBoardVersion() {
+  uint32_t version;
+  uint8_t i = EEPROM_readAnything(FIRMWARE_ADDRESS, version);
+  
+  if(i > 0) {
+    return version;
+  } else {
+    return false;
+  }
+}
+
+uint32_t GRITSBotMain::getMotorBoardVersion() {
+  I2C_->sendMessage(MSG_GET_FIRMWARE_VERSION, 0.0, 0.0);
+  delay(I2CRequestTimeout_);
+
+  if(I2C_->receiveMessage(&I2CBuffer_)) {
+    return (uint32_t) I2CBuffer_.data_[0].fval;
+  }
+
+  return false;
 }

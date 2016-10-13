@@ -56,6 +56,7 @@
 #define MSG_GET_STATE             34
 #define MSG_GET_BATTERY_LEVEL     35
 #define MSG_GET_NEIGHBORS         36
+#define MSG_GET_FIRMWARE_VERSION  37
 
 /* Get average performance messages */
 #define MSG_GET_AVG_RPS           50 

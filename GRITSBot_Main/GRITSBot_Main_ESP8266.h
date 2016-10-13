@@ -15,6 +15,12 @@
 #ifndef _GRITSBOT_MAIN_h_
 #define _GRITSBOT_MAIN_h_
 
+//------------------------------------------------------------------
+// Define firmware version
+//------------------------------------------------------------------
+#define FIRMWARE_VERSION 13102016
+#define FIRMWARE_ADDRESS 10
+
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
@@ -46,6 +52,9 @@
 
 /* Include averaging class */
 #include "include/utilities/average.h"
+
+/* Include EEPROM interface */
+#include "include/utilities/EEPROM_Interface.h"
 
 /* Include low-level ESP8266 headers */
 extern "C" {
@@ -164,6 +173,11 @@ class GRITSBotMain {
 
     /* Utility functions */
     float map(float x, float inMin, float inMax, float outMin, float outMax);
+
+    /* Versioning functions */
+    bool setMainBoardVersion(uint32_t version);
+    uint32_t getMainBoardVersion();
+    uint32_t getMotorBoardVersion();
 
     //--------------------------------------------------------------------------
     // Public Member Variables

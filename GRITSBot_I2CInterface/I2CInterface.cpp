@@ -100,7 +100,7 @@ bool I2CInterface::receiveMessage(I2CMessage* msgOut, uint8_t address) {
    * float   data    ... 2 * 4 bytes
    */
   if(isMaster_) { 
-    Wire.requestFrom(address, 9);
+    Wire.requestFrom(address, (uint8_t)9);
   }
 
   /* Read message type */

@@ -20,6 +20,7 @@
 //------------------------------------------------------------------------------
 #include <Arduino.h>
 #include <Wire.h>
+#include <EEPROM.h>
 #include <util/delay.h>
 #include <avr/io.h>
 #include <avr/sleep.h>
@@ -31,6 +32,7 @@
 
 /* Include utility headers */
 #include "include/utilities/average.h"
+#include "include/utilities/EEPROM_Interface.h"
 
 //------------------------------------------------------------------------------
 // CPU frequency (8 MHz) 
@@ -47,6 +49,13 @@
 // Defines
 //------------------------------------------------------------------------------
 #define I2C_TX_LEN_MOTOR    3
+#define STEPS_PER_REVOLUTION 60
+
+//------------------------------------------------------------------
+// Define firmware version
+//------------------------------------------------------------------
+#define FIRMWARE_VERSION 13102016
+#define FIRMWARE_ADDRESS 10
 
 //------------------------------------------------------------------------------
 // Define motor pins
@@ -54,7 +63,7 @@
 /* Yellow Circuithub robots are     V5 */
 /* Green Seeedstudio robots are     V4 */
 /* Purple Oshpark robots are mostly V3 */
-#define VERSION 4
+#define VERSION 5
 
 #if VERSION == 5
 /* Yellow Circuithub robots are V5 */
@@ -182,6 +191,10 @@ class GRITSBotMotor {
 
     /* Data collection functions */
     void collectData();
+
+    /* Versioning functions */
+    bool setVersion(uint32_t version);
+    uint32_t getVersion();
 
     //--------------------------------------------------------------------------
     // Public Member Variables

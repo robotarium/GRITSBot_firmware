@@ -69,6 +69,8 @@ void setup() {
   ArduinoOTA.begin();
   Serial.println("Ready for OTA firmware updates");
   Serial.println("Main board initialized");
+  Serial.print("Version Main : "); Serial.println(mainboard.getMainBoardVersion());
+  Serial.print("Version Motor: "); Serial.println(mainboard.getMotorBoardVersion());
 }
 
 /* ********************
