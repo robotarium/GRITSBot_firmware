@@ -3,6 +3,9 @@
  */
 #define ESP8266
 
+/* Include NeoPixel library for WS2812 LEDs */
+#include <Adafruit_NeoPixel.h>
+
 /* Include basic Arduino libraries */
 #include <EEPROM.h>
 #include <Arduino.h>
@@ -52,8 +55,11 @@ Adafruit_INA219 ina219;
 ControllerTarget controller;
 EstimatorBase estimator;
 
+/* Instantiate WS2812 RGB LED strip */
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(2, LED_PIN, NEO_GRB + NEO_KHZ800);
+
 /* Instantiate main board */
-GRITSBotMain mainboard(&wifi, &i2c, &ina219, &controller, &estimator);
+GRITSBotMain mainboard(&wifi, &i2c, &ina219, &strip, &controller, &estimator);
 
 /* **********************
  *     SETUP FUNCTION
@@ -69,8 +75,13 @@ void setup() {
   ArduinoOTA.begin();
   Serial.println("Ready for OTA firmware updates");
   Serial.println("Main board initialized");
-  Serial.print("Version Main : "); Serial.println(mainboard.getMainBoardVersion());
-  Serial.print("Version Motor: "); Serial.println(mainboard.getMotorBoardVersion());
+  Serial.print("Version Firmware Main : "); Serial.println(mainboard.getMainBoardFirmwareVersion());
+  Serial.print("Version Hardware Main : "); Serial.println(mainboard.getMainBoardHardwareVersion());
+  Serial.print("Version Firmware Motor: "); Serial.println(mainboard.getMotorBoardFirmwareVersion());
+  Serial.print("Version Hardware Motor: "); Serial.println(mainboard.getMotorBoardHardwareVersion()); 
+
+  /* Rainbow RGB LED animation */
+  mainboard.rainbow(20);
 }
 
 /* ********************
