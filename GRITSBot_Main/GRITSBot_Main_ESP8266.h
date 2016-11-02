@@ -1,5 +1,5 @@
 /*
- -------------------------------------------------------------------------------
+ -------------------------------------------------------------------
  GRITSBot Main Board class
  
  METHODS:
@@ -9,21 +9,30 @@
  EXAMPLES:
  
  Initially created by Daniel Pickem 7/18/14.
- -------------------------------------------------------------------------------
- */
+ -------------------------------------------------------------------
+*/
 
 #ifndef _GRITSBOT_MAIN_h_
 #define _GRITSBOT_MAIN_h_
 
 //------------------------------------------------------------------
-// Define firmware version
+// Define firmware and hardware version
 //------------------------------------------------------------------
-#define FIRMWARE_VERSION 13102016
+#define FIRMWARE_VERSION 20161101
+#define HARDWARE_VERSION 20161020
 #define FIRMWARE_ADDRESS 10
+#define HARDWARE_ADDRESS 30
+#define DEBUG_LEVEL 1
 
-//------------------------------------------------------------------------------
+//------------------------------------------------------------------
+// Defines
+//------------------------------------------------------------------
+#define LED_PIN                4
+#define CHARGER_CONNECTION_PIN 13
+
+//------------------------------------------------------------------
 // Includes
-//------------------------------------------------------------------------------
+//------------------------------------------------------------------
 /* Include basic Arduino libraries */
 #include <Arduino.h>
 #include <EEPROM.h>
@@ -34,6 +43,9 @@
 
 /* Include current sensor */
 #include <Adafruit_INA219.h>
+
+/* Include NeoPixel library for WS2812 LEDs */
+#include <Adafruit_NeoPixel.h>
 
 /* Include message definitions */
 #include "GRITSBot_Messages.h"
@@ -70,27 +82,21 @@ extern "C" {
 #include "lwip/dns.h"
 }
 
-//------------------------------------------------------------------------------
-// Defines
-//------------------------------------------------------------------------------
-#define LED_PIN                4
-#define CHARGE_STATUS_PIN     12
-#define CHARGE_CONNECTION_PIN 13
-
-//------------------------------------------------------------------------------
+//------------------------------------------------------------------
 // ENUM definitions
-//------------------------------------------------------------------------------
+//------------------------------------------------------------------
 enum MODE {MANUAL_MODE, CONTROLLER_MODE};
 
 class GRITSBotMain {
-  //--------------------------------------------------------------------------
+  //----------------------------------------------------------------
   // Public Member Functions
-  //--------------------------------------------------------------------------
+  //----------------------------------------------------------------
   public:
     /* Constructors */
     GRITSBotMain(WirelessInterfaceESP8266*  radio, 
                  I2CInterface*              i2c, 
                  Adafruit_INA219*           ina219,
+                 Adafruit_NeoPixel*         strip,
                  ControllerBase*            controller = NULL,
                  EstimatorBase*             estimator = NULL);
 
@@ -116,9 +122,7 @@ class GRITSBotMain {
     void JSONSendMessage(String JSONData);
 
     /* Get field values from JsonObject */
-    bool    JSONGetInt(JsonObject& root, String field, int& output);
-    bool    JSONGetFloat(JsonObject& root, String field, float& output);
-    String  JSONGetString(JsonObject& root, String field);
+    template <typename T> bool JSONGetNumber(JsonObject& root, String field, T& output);
 
     /* Controls-related functions */
     void updateController();
@@ -128,6 +132,14 @@ class GRITSBotMain {
     void toggleLed();
     void ledOn();
     void ledOff();
+
+    /* RGB Led output functions */
+    void setLedRGB(uint8_t index, uint32_t color);
+    void setLedsRGB(uint32_t color);
+    void disableLedRGB(uint8_t index);
+    void disableLedsRGB();
+    void rainbow(uint8_t wait);
+    uint32_t Wheel(byte WheelPos);
 
     /* Data collection functions */
     void updateMeasurements();
@@ -175,19 +187,22 @@ class GRITSBotMain {
     float map(float x, float inMin, float inMax, float outMin, float outMax);
 
     /* Versioning functions */
-    bool setMainBoardVersion(uint32_t version);
-    uint32_t getMainBoardVersion();
-    uint32_t getMotorBoardVersion();
+    bool setMainBoardFirmwareVersion(uint32_t version);
+    bool setMainBoardHardwareVersion(uint32_t version);
+    uint32_t getMainBoardFirmwareVersion();
+    uint32_t getMotorBoardFirmwareVersion();
+    uint32_t getMainBoardHardwareVersion();
+    uint32_t getMotorBoardHardwareVersion();
 
-    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------
     // Public Member Variables
-    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------
     WirelessInterfaceESP8266* radio_;
 
     private:
-    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------
     // Private Member Variables
-    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------
     /* Controls-related */
     uint8_t           mode_;
     floatUnion        v_;
@@ -229,5 +244,8 @@ class GRITSBotMain {
     uint32_t lastChargedStatusMessage_;
     uint32_t lastBatteryEmpytCheck_;
     uint32_t lastDataTest_;
+
+    /* LED parameters */ 
+    Adafruit_NeoPixel* strip_;
 };
 #endif
