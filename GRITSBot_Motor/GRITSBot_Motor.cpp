@@ -60,8 +60,9 @@ void GRITSBotMotor::initialize(uint8_t address) {
   /* Set initial steps per revolution to 50 */
   setStepsPerRevolution(STEPS_PER_REVOLUTION);
 
-  /* Set firmware version */
-  setVersion(FIRMWARE_VERSION); 
+  /* Set firmware and hardware version */
+  setFirmwareVersion(FIRMWARE_VERSION); 
+  setHardwareVersion(HARDWARE_VERSION); 
 }
 
 //------------------------------------------------------------------------------
@@ -203,7 +204,10 @@ void GRITSBotMotor::requestEvent() {
                                              currentRightAvg_.getAverage());
       break;
     case(MSG_GET_FIRMWARE_VERSION):
-      i2c_.sendMessage(MSG_GET_FIRMWARE_VERSION, getVersion(), 0.0);
+      i2c_.sendMessage(MSG_GET_FIRMWARE_VERSION, getFirmwareVersion(), 0.0);
+      break;
+    case(MSG_GET_HARDWARE_VERSION):
+      i2c_.sendMessage(MSG_GET_FIRMWARE_VERSION, getHardwareVersion(), 0.0);
       break;
     case(MSG_ECHO):
       i2c_.sendMessage(MSG_ECHO, I2CBuffer_.data_[0].fval, 
@@ -717,7 +721,7 @@ float GRITSBotMotor::map(float x, float inMin, float inMax, float outMin, float 
   return (x - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
 }
 
-bool GRITSBotMotor::setVersion(uint32_t version) {
+bool GRITSBotMotor::setFirmwareVersion(uint32_t version) {
   uint8_t i = EEPROM_writeAnything(FIRMWARE_ADDRESS, version);
 
   if(i > 0) {
@@ -727,9 +731,30 @@ bool GRITSBotMotor::setVersion(uint32_t version) {
   }
 }
 
-uint32_t GRITSBotMotor::getVersion() {
+bool GRITSBotMotor::setHardwareVersion(uint32_t version) {
+  uint8_t i = EEPROM_writeAnything(HARDWARE_ADDRESS, version);
+
+  if(i > 0) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+uint32_t GRITSBotMotor::getFirmwareVersion() {
   uint32_t version;
   uint8_t i = EEPROM_readAnything(FIRMWARE_ADDRESS, version);
+  
+  if(i > 0) {
+    return version;
+  } else {
+    return 0;
+  }
+}
+
+uint32_t GRITSBotMotor::getHardwareVersion() {
+  uint32_t version;
+  uint8_t i = EEPROM_readAnything(HARDWARE_ADDRESS, version);
   
   if(i > 0) {
     return version;
