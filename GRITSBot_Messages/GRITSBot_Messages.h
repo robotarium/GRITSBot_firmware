@@ -31,7 +31,7 @@
 #define MSG_SET_RPS               5
 #define MSG_SET_RPS_MAX           6
 #define MSG_SET_LED_RGB           7
-#define MSG_SET_CALIBRATION_DATA  8
+#define MSG_SET_ALL_LED_RGB       8
 #define MSG_SET_EEPROM_CELL       9
 #define MSG_SET_MODE              10
 #define MSG_SET_STEPS_PER_REV     11
@@ -57,6 +57,7 @@
 #define MSG_GET_BATTERY_LEVEL     35
 #define MSG_GET_NEIGHBORS         36
 #define MSG_GET_FIRMWARE_VERSION  37
+#define MSG_GET_HARDWARE_VERSION  38
 
 /* Get average performance messages */
 #define MSG_GET_AVG_RPS           50 
