@@ -23,10 +23,10 @@ void receiveEvent(int nBytes);
 GRITSBotMotor motorboard;
 
 /* Set velocities for forward, backward, rotate cw, rotate ccw */
-//float vSet[] = {0.2, -0.2,  0.0,   0.0};
-//float wSet[] = {0.0,  0.0, 360.0, -360.0};
-float vSet[] = {0.1, 0.0};
-float wSet[] = {0.0, 360.0};
+float vSet[] = {0.1, -0.1,  0.0,   0.0};
+float wSet[] = {0.0,  0.0, 360.0, -360.0};
+//float vSet[] = {0.1, 0.0};
+//float wSet[] = {0.0, 360.0};
 
 unsigned long lastTransition = micros();
 
@@ -51,7 +51,7 @@ void loop() {
   if( (lastTransition + 1 * 1E6) < micros() ) {
     lastTransition = micros();
 
-    int mode = random(0, 2);
+    int mode = random(0, 4);
     motorboard.setVelocities(vSet[mode], wSet[mode]);
     motorboard.toggleLeds();
   }

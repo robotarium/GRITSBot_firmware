@@ -53,6 +53,7 @@ bool WirelessInterfaceESP8266::initialize(){
     /* Start listening for UDP packages */  
     if(udp_.begin(portIncoming_)) {
       Serial.print("Connected AP: "); Serial.println(wifiConfig::wifiSSID);
+      Serial.print("Local IP: "); Serial.println(WiFi.localIP());
       Serial.print("Listening on UDP port: "); Serial.println(portIncoming_);
     }
 

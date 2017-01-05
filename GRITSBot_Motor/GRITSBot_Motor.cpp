@@ -235,6 +235,7 @@ void GRITSBotMotor::receiveEvent() {
 
   /* Receive and process message */
   if(i2c_.receiveMessage(&I2CBuffer_)) {
+    //I2CBuffer_.print();
     processI2CMessage(&I2CBuffer_);
 
     /* Visual feedback */

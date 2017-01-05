@@ -27,11 +27,11 @@ void setup() {
   /* Initialize motorboard */
   motorboard.initialize();
   motorboard.ledsOn();
-  
+
   /* Register I2C events */
   Wire.onRequest(requestEvent);
   Wire.onReceive(receiveEvent);
-  
+
   Serial.begin(115200);
   Serial.println("Started motor board");
 }
@@ -42,11 +42,11 @@ void loop() {
 }
 
 void requestEvent() {
-  motorboard.requestEvent();  
+  motorboard.requestEvent();
 }
 
 void receiveEvent(int nBytes) {
-  motorboard.receiveEvent();  
+  motorboard.receiveEvent();
 }
 
 /* Watchdog interrupt routine */
