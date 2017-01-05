@@ -384,6 +384,20 @@ bool GRITSBotMain::processUDPMessage() {
           }
           break;
         }
+      case(MSG_SET_LED_RGB_EFFECT):
+        {
+          uint16_t reps;
+          String effectType = JSONGetString(root, String("effectType"));
+          if(effectType == "rainbow") {
+            if(JSONGetNumber<uint16_t>(root, "reps", reps)) {
+              rainbow(20, reps);
+            } else {
+              rainbow(20, 1);
+            }
+          } else {
+
+          }
+        }
       case(MSG_GET_BATT_VOLT):
       	{
 		      String fields[3] = {"msgType", "vBat", "iBat"};
@@ -551,7 +565,7 @@ void GRITSBotMain::sendHeartbeatMessage() {
       float voltageStepUp = getStepUpVoltage();
 
       /* Create heartbeat message */
-      String fields[10]  = {"msgType", "vBat", "iBat", "rpsL", "rpsR", "tempL", 														"tempR", "iMotorL", "iMotorR", "vBoost"};
+      String fields[10]  = {"msgType", "vBat", "iBat", "rpsL", "rpsR", "tempL", "tempR", "iMotorL", "iMotorR", "vBoost"};
       float data[10]     = {MSG_HEARTBEAT, batteryVoltage_, current_.getAverage(),
                             rpsL, rpsR, tempL, tempR, curL, curR, voltageStepUp};
 
@@ -728,6 +742,14 @@ template <typename T> bool GRITSBotMain::JSONGetNumber(JsonObject& root, String 
   }
 }
 
+String GRITSBotMain::JSONGetString(JsonObject& root, String field) {
+  if(root.containsKey(field)) {
+    return root[field].asString();
+  } else {
+    return String("");
+  }
+}
+
 /* **************************************
  *      CONTROLS-RELATED FUNCTIONS
  ****************************************/
@@ -820,6 +842,17 @@ void GRITSBotMain::printChargeStatus() {
     Serial.print(" / ");
     Serial.println(batteryVoltage_);
   }
+}
+
+/* ***************************
+ * POWER MANAGEMENT FUNCTIONS
+ ****************************/
+void GRITSBotMain::enableMotorVoltage() {
+  digitalWrite(STEPUP_EN_PIN, HIGH);
+}
+
+void GRITSBotMain::disableMotorVoltage() {
+  digitalWrite(STEPUP_EN_PIN, LOW);
 }
 
 /* ***************************
@@ -1105,16 +1138,18 @@ void GRITSBotMain::disableLedsRGB() {
 }
 
 /* Taken from Adafruit's NeoPixel library */
-void GRITSBotMain::rainbow(uint8_t wait) {
-  uint16_t i, j;
+void GRITSBotMain::rainbow(uint8_t wait, uint8_t repetitions) {
+  uint16_t i, j, r;
 
-  for(j = 0; j < 256; j++) {
-    for(i = 0; i < strip_->numPixels(); i++) {
-      strip_->setPixelColor(i, Wheel((i+j) & 255));
+  for(r = 0; r < repetitions; r++) {
+    for(j = 0; j < 256; j++) {
+      for(i = 0; i < strip_->numPixels(); i++) {
+        strip_->setPixelColor(i, Wheel((i+j) & 255));
+      }
+
+      strip_->show();
+      delay(wait);
     }
-
-    strip_->show();
-    delay(wait);
   }
 }
 

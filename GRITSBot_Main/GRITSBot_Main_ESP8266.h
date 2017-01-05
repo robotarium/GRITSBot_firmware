@@ -27,7 +27,8 @@
 //------------------------------------------------------------------
 // Defines
 //------------------------------------------------------------------
-#define LED_PIN                4
+#define LED_PIN                 4
+#define STEPUP_EN_PIN           5
 #define CHARGER_CONNECTION_PIN 13
 
 //------------------------------------------------------------------
@@ -114,7 +115,7 @@ class GRITSBotMain {
     void sendErrorMessage(String error, String parameters="");
     void sendStatusMessage(String status, String parameters="");
 
-    /* Wireless MQTT communication functions */
+    /* JSON communication primitives */
     void JSONSendMessage(String* fields, float* data, int len);
     void JSONSendMessage(String* fields, String* data, int len);
     void JSONSendMessage(String field, String data);
@@ -123,6 +124,7 @@ class GRITSBotMain {
 
     /* Get field values from JsonObject */
     template <typename T> bool JSONGetNumber(JsonObject& root, String field, T& output);
+    String JSONGetString(JsonObject& root, String field);
 
     /* Controls-related functions */
     void updateController();
@@ -138,7 +140,7 @@ class GRITSBotMain {
     void setLedsRGB(uint32_t color);
     void disableLedRGB(uint8_t index);
     void disableLedsRGB();
-    void rainbow(uint8_t wait);
+    void rainbow(uint8_t wait, uint8_t repetitions = 1);
     uint32_t Wheel(byte WheelPos);
 
     /* Data collection functions */
@@ -160,6 +162,10 @@ class GRITSBotMain {
     void chargingStatusNotification();
     void chargerConnectedNotification();
     void printChargeStatus();
+
+    /* Power management functions */
+    void enableMotorVoltage();
+    void disableMotorVoltage();
 
     /* Sleep functions */
     void enableDeepSleep();
