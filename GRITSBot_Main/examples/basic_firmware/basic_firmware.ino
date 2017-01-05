@@ -70,6 +70,9 @@ void setup() {
 
   /* Initialize boards */
   mainboard.initialize();
+
+  /* REMOVE: Disable motor voltage for testing */
+  mainboard.disableMotorVoltage();
   
   /* Initializing OTA */
   ArduinoOTA.begin();
@@ -81,7 +84,8 @@ void setup() {
   Serial.print("Version Hardware Motor: "); Serial.println(mainboard.getMotorBoardHardwareVersion()); 
 
   /* Rainbow RGB LED animation */
-  mainboard.rainbow(20);
+  mainboard.rainbow(10);
+  mainboard.disableLedsRGB();
 }
 
 /* ********************

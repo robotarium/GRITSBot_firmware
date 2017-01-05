@@ -31,12 +31,13 @@
 #define MSG_SET_RPS               5
 #define MSG_SET_RPS_MAX           6
 #define MSG_SET_LED_RGB           7
-#define MSG_SET_ALL_LED_RGB       8
-#define MSG_SET_EEPROM_CELL       9
-#define MSG_SET_MODE              10
-#define MSG_SET_STEPS_PER_REV     11
-#define MSG_UPDATE_ESTIMATOR      12
-#define MSG_UPDATE_DYNAMICS       13
+#define MSG_SET_LED_RGB_EFFECT    8
+#define MSG_SET_ALL_LED_RGB       9
+#define MSG_SET_EEPROM_CELL       10
+#define MSG_SET_MODE              11
+#define MSG_SET_STEPS_PER_REV     12
+#define MSG_UPDATE_ESTIMATOR      13
+#define MSG_UPDATE_DYNAMICS       14
 
 /* Individual get messages */
 #define MSG_GET_CURRENT_POSE      20
