@@ -258,7 +258,7 @@ bool GRITSBotMain::processUDPMessage() {
   }
 
   /* Parse message type */
-  if(JSONGetNumber<uint8_t>(root, String("type"), msgType)) {
+  if(JSONGetNumber<uint8_t>(root, String("msgType"), msgType)) {
     switch(msgType) {
       case(MSG_SET_CURRENT_POSE):
       	{
@@ -390,9 +390,9 @@ bool GRITSBotMain::processUDPMessage() {
           String effectType = JSONGetString(root, String("effectType"));
           if(effectType == "rainbow") {
             if(JSONGetNumber<uint16_t>(root, "reps", reps)) {
-              rainbow(20, reps);
+              rainbow(10, reps);
             } else {
-              rainbow(20, 1);
+              rainbow(10, 1);
             }
           } else {
 
