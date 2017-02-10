@@ -20,10 +20,6 @@
 /* Include JSON parser */
 #include <ArduinoJson.h>
 
-/*include OTA Libraries */
-#include <ArduinoOTA.h>
-#include <ESP8266mDNS.h>
-
 /* Include current sensor library */
 #include <Adafruit_INA219.h>
 
@@ -72,8 +68,6 @@ void setup() {
   Serial.println("Mainboard initialized...");
 
   /* Initializing OTA */
-  ArduinoOTA.begin();
-  Serial.println("Ready for OTA firmware updates");
   Serial.println("Main board initialized");
   Serial.print("Version Firmware Main : "); Serial.println(mainboard.getMainBoardFirmwareVersion());
   Serial.print("Version Hardware Main : "); Serial.println(mainboard.getMainBoardHardwareVersion());
@@ -105,7 +99,4 @@ void loop() {
   /* Update measurement and data collection */
   yield();
   mainboard.updateMeasurements();
-
-  /*OTA handling*/
-  ArduinoOTA.handle();
 }

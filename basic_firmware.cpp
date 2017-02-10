@@ -3,6 +3,9 @@
  */
 #define ESP8266
 
+/* Include NeoPixel library for WS2812 LEDs */
+#include <Adafruit_NeoPixel.h>
+
 /* Include basic Arduino libraries */
 #include <EEPROM.h>
 #include <Arduino.h>
@@ -52,9 +55,19 @@ Adafruit_INA219 ina219;
 ControllerTarget controller;
 EstimatorBase estimator;
 
-/* Instantiate main board */
-GRITSBotMain mainboard(&wifi, &i2c, &ina219, &controller, &estimator);
+/* Instantiate WS2812 RGB LED strip */
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(2, LED_PIN, NEO_GRB + NEO_KHZ800);
 
+/* Instantiate main board */
+GRITSBotMain mainboard(&wifi, &i2c, &ina219, &strip, &controller, &estimator);
+
+/* Set velocities for forward, backward, rotate cw, rotate ccw */
+float vSet[] = {0.1, 0.1,  0.0,   0.0};
+float wSet[] = {0.0,  0.0, 180.0 * M_PI/180.0, -180.0 * M_PI/ 180.0};
+String dir[] = {"forward", "backward", "CCW", "CW"};
+unsigned long lastTransition = micros();
+int mode;
+bool enableRandomWalk = 0;
 /* **********************
  *     SETUP FUNCTION
  * **********************/
@@ -65,25 +78,50 @@ void setup() {
   /* Initialize boards */
   mainboard.initialize();
 
+  /* REMOVE: Disable motor voltage for testing */
+  mainboard.enableMotorVoltage();
+
   /* Initializing OTA */
   ArduinoOTA.begin();
   Serial.println("Ready for OTA firmware updates");
   Serial.println("Main board initialized");
+  Serial.print("Version Firmware Main : "); Serial.println(mainboard.getMainBoardFirmwareVersion());
+  Serial.print("Version Hardware Main : "); Serial.println(mainboard.getMainBoardHardwareVersion());
+  Serial.print("Version Firmware Motor: "); Serial.println(mainboard.getMotorBoardFirmwareVersion());
+  Serial.print("Version Hardware Motor: "); Serial.println(mainboard.getMotorBoardHardwareVersion());
+
+  /* Rainbow RGB LED animation */
+  mainboard.rainbow(10);
+  mainboard.disableLedsRGB();
 }
 
 /* ********************
  *     MAIN LOOP
  * ********************/
 void loop() {
+  mainboard.enableMotorVoltage();
   /* Update wireless function takes care of all message processing
    * and sends out heartbeat message every second
    */
   yield();
   mainboard.updateWireless();
 
-  /* Update controller */
-  yield();
-  mainboard.updateController();
+  if (enableRandomWalk) {
+  /* Random transitions every 2 seconds */
+  if( (lastTransition + 2 * 1E6) < micros() ) {
+    lastTransition = micros();
+    mode = random(0, 4);
+    mainboard.setVelocities(vSet[mode], wSet[mode]);
+    Serial.print("Transition to mode: "); Serial.println(dir[mode]);
+    }
+    mainboard.setVelocities(vSet[mode], wSet[mode]);
+    delay(20);
+  }
+  else {
+    /* Update controller */
+    yield();
+    mainboard.updateController();
+ }
 
   /* Update measurement and data collection */
   yield();

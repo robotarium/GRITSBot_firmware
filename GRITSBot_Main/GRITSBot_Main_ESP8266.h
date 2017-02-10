@@ -1,13 +1,13 @@
 /*
  -------------------------------------------------------------------
  GRITSBot Main Board class
- 
+
  METHODS:
 
  NOTES:
- 
+
  EXAMPLES:
- 
+
  Initially created by Daniel Pickem 7/18/14.
  -------------------------------------------------------------------
 */
@@ -49,14 +49,14 @@
 #include <Adafruit_NeoPixel.h>
 
 /* Include message definitions */
-#include "GRITSBot_Messages.h"
+#include "GRITSBot_Messages/GRITSBot_Messages.h"
 
 /* Include I2C and wireless interfaces */
-#include "I2CInterface.h"
+#include "GRITSBot_I2CInterface/I2CInterface.h"
 
 /* Include GRITSBot interface definitions for WiFi and credentials */
-#include "wirelessInterfaceESP8266.h"
-#include "wifiConfig.h"
+#include "GRITSBot_WirelessInterface/wirelessInterfaceESP8266.h"
+#include "GRITSBot_WiFiConfig/wifiConfig.h"
 
 /* Include estimator and controller libraries */
 #include "include/controller/controllerBase.h"
@@ -94,8 +94,8 @@ class GRITSBotMain {
   //----------------------------------------------------------------
   public:
     /* Constructors */
-    GRITSBotMain(WirelessInterfaceESP8266*  radio, 
-                 I2CInterface*              i2c, 
+    GRITSBotMain(WirelessInterfaceESP8266*  radio,
+                 I2CInterface*              i2c,
                  Adafruit_INA219*           ina219,
                  Adafruit_NeoPixel*         strip,
                  ControllerBase*            controller = NULL,
@@ -251,7 +251,7 @@ class GRITSBotMain {
     uint32_t lastBatteryEmpytCheck_;
     uint32_t lastDataTest_;
 
-    /* LED parameters */ 
+    /* LED parameters */
     Adafruit_NeoPixel* strip_;
 };
 #endif

@@ -1,9 +1,9 @@
-/* 
+/*
  ------------------------------------------------------------------
  GRITSBot Main Board class
- 
+
  Initially created by Daniel Pickem 7/18/14.
- 
+
  Version 1.0
  ------------------------------------------------------------------
 */
@@ -14,8 +14,8 @@
 #include "GRITSBot_Main_ESP8266.h"
 
 // Constructors
-GRITSBotMain::GRITSBotMain(WirelessInterfaceESP8266*  radio, 
-                           I2CInterface*              i2c, 
+GRITSBotMain::GRITSBotMain(WirelessInterfaceESP8266*  radio,
+                           I2CInterface*              i2c,
                            Adafruit_INA219*           ina219,
                            Adafruit_NeoPixel*         strip,
                            ControllerBase*            controller,
@@ -26,7 +26,7 @@ GRITSBotMain::GRITSBotMain(WirelessInterfaceESP8266*  radio,
   strip_      = strip;
   controller_ = controller;
   estimator_  = estimator;
-} 
+}
 
 // Destructor
 GRITSBotMain::~GRITSBotMain() {}
@@ -53,9 +53,15 @@ void GRITSBotMain::initialize() {
   /* Set LED pin */
   pinMode(LED_PIN, OUTPUT);
 
+  /* Set boost enable pin mode */
+  pinMode(STEPUP_EN_PIN, OUTPUT);
+
+  /* Set charge connector pin to input */
+  pinMode(CHARGER_CONNECTION_PIN, INPUT);
+
   /* Set up RGB Leds using Adafruits NeoPixel library and initialize all pixels as 'off'*/
   strip_->begin();
-  strip_->show(); 
+  strip_->show();
   strip_->setBrightness(64);
 
   /* Initialize radio */
@@ -63,7 +69,7 @@ void GRITSBotMain::initialize() {
   Serial.println("Mainboard radio initialized");
 
   /* Set up mainboard as I2C master */
-  I2C_->initialize(2, 14); 
+  I2C_->initialize(2, 14);
 
   /* Set I2C communication parameters */
   I2CRequestTimeout_ = 1;               /* Wait time for I2C request in ms */
@@ -71,7 +77,7 @@ void GRITSBotMain::initialize() {
   Serial.println("Mainboard I2C initialized");
 
   /* Set up current sensor */
-  /* NOTE: ina219_->begin() does not need to be called since 
+  /* NOTE: ina219_->begin() does not need to be called since
    * I2C is already set up.
    */
   ina219_->setCalibration_16V_400mA();
@@ -95,11 +101,11 @@ void GRITSBotMain::initialize() {
 
   /* Set firmware version */
   EEPROM.begin(512);
-  setMainBoardFirmwareVersion(FIRMWARE_VERSION); 
-  setMainBoardHardwareVersion(HARDWARE_VERSION); 
+  setMainBoardFirmwareVersion(FIRMWARE_VERSION);
+  setMainBoardHardwareVersion(HARDWARE_VERSION);
 
-  /* Charging chip status pin is NOT connected to ESP8266 because 
-   * its output is not reliable whatsoever. Charge status is 
+  /* Charging chip status pin is NOT connected to ESP8266 because
+   * its output is not reliable whatsoever. Charge status is
    * determined by battery voltage and CHARGER_CONNECTION_PIN.
    *
    * Charging voltage connected to GPIO 13.
@@ -107,7 +113,7 @@ void GRITSBotMain::initialize() {
    * HIGH ... charger connected
    */
 
-  /* Send status message based on EEPROM sleep flag 
+  /* Send status message based on EEPROM sleep flag
    * NOTE: This is done in the processUDPMessage function since the   *       robot needs to receive a host IP and port first
    */
 }
@@ -191,7 +197,7 @@ void GRITSBotMain::updateMeasurements() {
         }
       }
     } else {
-      /* If no transition is detected, only send a status update once 
+      /* If no transition is detected, only send a status update once
          charging is done */
 
       /* No change on charger connected pin */
@@ -199,7 +205,7 @@ void GRITSBotMain::updateMeasurements() {
         if(isCharged()) {
           if( (millis() - lastChargedStatusMessage_ ) > 2000) {
             sendStatusMessage("charged", String(batteryVoltage_));
-            
+
             /* Update time stamp */
             lastChargedStatusMessage_ = millis();
           }
@@ -232,12 +238,12 @@ void GRITSBotMain::updateWireless() {
       lastMessage_ = millis();
 
       /* Visual output */
-      toggleLed(); 
+      toggleLed();
 
       /* Process message */
       yield();
       processUDPMessage();
-    } 
+    }
   }
 }
 
@@ -253,9 +259,9 @@ bool GRITSBotMain::processUDPMessage() {
   String msg = radio_->getMessage();
   JsonObject& root = jsonBuffer.parseObject(msg);
 
-  if(DEBUG_LEVEL > 1) {
+  //if(DEBUG_LEVEL > 1) {
     Serial.println(msg);
-  }
+  //}
 
   /* Parse message type */
   if(JSONGetNumber<uint8_t>(root, String("msgType"), msgType)) {
@@ -264,8 +270,8 @@ bool GRITSBotMain::processUDPMessage() {
       	{
 		    	if(estimator_ != NULL) {
 		    		float x = 0, y = 0, theta = 0;
-				    if(JSONGetNumber<float>(root, "x", x) && 
-				    		JSONGetNumber<float>(root, "y", y) && 
+				    if(JSONGetNumber<float>(root, "x", x) &&
+				    		JSONGetNumber<float>(root, "y", y) &&
 				    		JSONGetNumber<float>(root, "theta", theta)) {
 						      /* Set current pose in estimator */
 						  		estimator_->setState(State(x,y,theta));
@@ -280,12 +286,12 @@ bool GRITSBotMain::processUDPMessage() {
       	{
 		      if(controller_ != NULL) {
 		    		float x = 0, y = 0, theta = 0;
-				    if(JSONGetNumber<float>(root, "x", x) && 
-				    		JSONGetNumber<float>(root, "y", y) && 
+				    if(JSONGetNumber<float>(root, "x", x) &&
+				    		JSONGetNumber<float>(root, "y", y) &&
 				    		JSONGetNumber<float>(root, "theta", theta)) {
 						  /* Update controller variables */
 							controller_->setTargetPosition(State(x,y,theta));
-						
+
 							/* Set operation mode */
 				      mode_ = CONTROLLER_MODE;
 						} else {
@@ -300,43 +306,43 @@ bool GRITSBotMain::processUDPMessage() {
       		float v = 0, w = 0;
 		      /* NOTE: This message type is used for remote control applications */
 		      /* Update velocities in the controller */
-		      if(JSONGetNumber<float>(root, "v", v) && 
+		      if(JSONGetNumber<float>(root, "v", v) &&
               JSONGetNumber<float>(root, "w", w)) {
 		        /* Update velocities of the main board */
 		      	setVelocities(v, w);
-		      	
+
 	 	        /* Set operation mode */
 			      mode_ = MANUAL_MODE;
 		      } else {
 		        error = "MSG_SET_VELOCITIES: Failed to parse v or w: " + msg;
 				  	sendErrorMessage(error);
-		      } 
+		      }
 		      break;
         }
       case(MSG_SET_VELOCITIES_MAX):
       	{
       		float vMax = 0, wMax = 0;
-		      if(JSONGetNumber<float>(root, "vMax", vMax) && 
+		      if(JSONGetNumber<float>(root, "vMax", vMax) &&
               JSONGetNumber<float>(root, "wMax", wMax)) {
 		        /* Update maximum velocities of the motor board */
 						setVelocitiesMax(vMax,wMax);
 		      } else {
 		        error = "MSG_SET_VELOCITIES_MAX: Failed to parse vMax or wMax: " + msg;
 				  	sendErrorMessage(error);
-		      } 
+		      }
 		      break;
         }
       case(MSG_SET_RPS):
 	      {
 	      	float rpsL = 0, rpsR = 0;
-		      if(JSONGetNumber<float>(root, "rpsL", rpsL) && 
+		      if(JSONGetNumber<float>(root, "rpsL", rpsL) &&
               JSONGetNumber<float>(root, "rpsR", rpsR)) {
 		        /* Update RPS values of the motor board */
 						setRPS(rpsL, rpsR);
 		      } else {
 		        error = "MSG_SET_RPS: Failed to parse rpsL or rpsR: " + msg;
 				  	sendErrorMessage(error);
-		      } 
+		      }
 		      break;
         }
       case(MSG_SET_RPS_MAX):
@@ -348,20 +354,20 @@ bool GRITSBotMain::processUDPMessage() {
 		      } else {
 		        error = "MSG_SET_RPS_MAX: Failed to parse rpsMax: " + msg;
 				  	sendErrorMessage(error);
-		      } 
+		      }
 		      break;
         }
       case(MSG_SET_STEPS_PER_REV):
       	{
       		float steps = 0;
 		      if(JSONGetNumber<float>(root, "steps", steps)) {
-		        /* Update steps per revolution value for the motor 
+		        /* Update steps per revolution value for the motor
              * board's stepper motors */
 						setStepsPerRevolution(steps);
 		      } else {
 		        error = "MSG_SET_STEPS_PER_REV: Failed to parse steps: " + msg;
 				  	sendErrorMessage(error);
-		      } 
+		      }
 		      break;
         }
       case(MSG_SET_LED_RGB):
@@ -394,6 +400,7 @@ bool GRITSBotMain::processUDPMessage() {
             } else {
               rainbow(10, 1);
             }
+            disableLedsRGB();
           } else {
 
           }
@@ -401,8 +408,8 @@ bool GRITSBotMain::processUDPMessage() {
       case(MSG_GET_BATT_VOLT):
       	{
 		      String fields[3] = {"msgType", "vBat", "iBat"};
-				  float data[3]    = {MSG_GET_BATT_VOLT, 
-				  										batteryVoltage_, 
+				  float data[3]    = {MSG_GET_BATT_VOLT,
+				  										batteryVoltage_,
 				  										current_.getAverage()};
 				  JSONSendMessage(fields, data, 3);
 		      break;
@@ -423,10 +430,10 @@ bool GRITSBotMain::processUDPMessage() {
         }
       case(MSG_GET_FIRMWARE_VERSION):
       	{
-		      String fields[3] = {"msgType", 
-                              "versionMain", 
+		      String fields[3] = {"msgType",
+                              "versionMain",
                               "versionMotor"};
-				  float data[3]    = {MSG_GET_FIRMWARE_VERSION, 
+				  float data[3]    = {MSG_GET_FIRMWARE_VERSION,
                               getMainBoardFirmwareVersion(),
                               getMotorBoardFirmwareVersion()};
 				  JSONSendMessage(fields, data, 3);
@@ -434,10 +441,10 @@ bool GRITSBotMain::processUDPMessage() {
         }
       case(MSG_GET_HARDWARE_VERSION):
       	{
-		      String fields[3] = {"msgType", 
-                              "versionMain", 
+		      String fields[3] = {"msgType",
+                              "versionMain",
                               "versionMotor"};
-				  float data[3]    = {MSG_GET_HARDWARE_VERSION, 
+				  float data[3]    = {MSG_GET_HARDWARE_VERSION,
                               getMainBoardHardwareVersion(),
                               getMotorBoardHardwareVersion()};
 				  JSONSendMessage(fields, data, 3);
@@ -473,7 +480,7 @@ bool GRITSBotMain::processUDPMessage() {
 		      }
 
 		      /* Send status message based on EEPROM sleep flag */
-		      bool sleepFlag = EEPROM.read(0); 
+		      bool sleepFlag = EEPROM.read(0);
 		      if(sleepFlag) {
 		        /* Send status message: wake up after sleep */
 		        sendStatusMessage("woke up");
@@ -484,13 +491,13 @@ bool GRITSBotMain::processUDPMessage() {
 		        /* Send status message: boot up */
 		        sendStatusMessage("powered up");
 		      }
-		      
+
 		      break;
         }
       case(MSG_DEEP_SLEEP):
       	{
 			    uint32_t sleepTime;
-			    
+
 		      /* Activate deep sleep */
 		      if(JSONGetNumber<uint32_t>(root, "sleepDuration", sleepTime)) {
 		        enableDeepSleep(sleepTime);
@@ -531,7 +538,7 @@ void GRITSBotMain::sendHeartbeatMessage() {
       /* These values signal to the host that robot has no Host IP */
       JSONSendMessage("MAC", MACAddress_);
     } else {
-      /* Gather all data relevant for statistical analysis 
+      /* Gather all data relevant for statistical analysis
        * 1. V_bat           ... battery voltage                   [V]
        * 2. I_bat           ... battery current                   [A]
        * 3. rps_left_avg    ... average left motor velocity     [RPS]
@@ -574,7 +581,7 @@ void GRITSBotMain::sendHeartbeatMessage() {
     }
 
     /* Update timestamp */
-    lastHeartbeat_ = millis(); 
+    lastHeartbeat_ = millis();
 
     /* Visual output */
     toggleLed();
@@ -588,7 +595,7 @@ void GRITSBotMain::sendRFMessage() {
    * 2. Physical mode (802.11 B/G/N ... 1/2/3)
    *    WIFI_PHY_MODE_11B = 1, WIFI_PHY_MODE_11G = 2, WIFI_PHY_MODE_11N = 3
    * 3. RSSI
-   * 4. SSID 
+   * 4. SSID
    *
    */
   yield();
@@ -611,7 +618,7 @@ void GRITSBotMain::sendRFMessage() {
 
       /* Create heartbeat message */
       String fields[5]  = {"msgType", "channel", "phyMode", "rssi", "ssid"};
-      String data[5]    = {String(MSG_RF_DATA), String(channel), String(phyMode), 
+      String data[5]    = {String(MSG_RF_DATA), String(channel), String(phyMode),
                            String(rssi), String(ssid)};
 
       /* Send RF message via UDP */
@@ -719,7 +726,7 @@ void GRITSBotMain::sendStatusMessage(String status, String parameters) {
   }
 
   if(DEBUG_LEVEL > 1) {
-    Serial.print("Status: "); 
+    Serial.print("Status: ");
     Serial.print(status);
     Serial.print(", ");
     Serial.println(parameters);
@@ -767,7 +774,7 @@ void GRITSBotMain::updateController() {
       setVelocities(controller_->getV(), controller_->getW());
     }
   }
-    
+
   /* Stop robot if no messages were received within 500 ms */
   if(millis() - lastMessage_ > 500){
     /* Update zero velocity settings at 5 Hz */
@@ -803,7 +810,7 @@ bool GRITSBotMain::isBatteryEmpty() {
   /* Threshold the battery voltage */
   if(batteryVoltage_ < 3.2) {
     return true;
-  } else { 
+  } else {
     return false;
   }
 }
@@ -861,7 +868,7 @@ void GRITSBotMain::disableMotorVoltage() {
 void GRITSBotMain::enableDeepSleep() {
   /* Put the robot to sleep indefinitely (both main and motor board)
    *
-   * NOTE: Only a power cycle will wake the robot up 
+   * NOTE: Only a power cycle will wake the robot up
    */
   /* Set sleep bit in EEPROM */
   EEPROM.write(0, true);
@@ -873,7 +880,7 @@ void GRITSBotMain::enableDeepSleep() {
 void GRITSBotMain::enableDeepSleep(uint32_t duration) {
   /* NOTE: Waking up requires the motor board to reset the main board through a
    *       short HIGH - LOW - HIGH pulse on the reset pin.
-   * NOTE: This function is called in updateWireless only in the 
+   * NOTE: This function is called in updateWireless only in the
    *       case when the battery voltage drops below 3.2 V without
    *       a charger being connected to avoid damaging the battery
    *       through under-charging.
@@ -929,7 +936,7 @@ void GRITSBotMain::setVelocities(float v, float w) {
   /* NOTE: v is in [m/sec]
    *       w is in [rad/sec]
    *
-   * NOTE: Motor board expects [deg/sec]. 
+   * NOTE: Motor board expects [deg/sec].
    */
   v_.fval = v;
   w_.fval = w;
@@ -980,7 +987,7 @@ float GRITSBotMain::getCurrentConsumption() {
 float GRITSBotMain::getStepUpVoltage() {
   /* NOTE: The ADC input of the ADC returns a value 0 - 1023,
    *       which corresponds to 0 - 1 V
-   * NOTE: A resistor divider maps the input voltage of 0 - 6 V 
+   * NOTE: A resistor divider maps the input voltage of 0 - 6 V
    *       to a range of 0 - 1 V, which the ESP8266 ADC expects.
    */
   uint16_t voltage = analogRead(A0);
@@ -994,7 +1001,7 @@ bool GRITSBotMain::sampleMotorBoardVelocities() {
   I2C_->sendMessage(MSG_GET_VELOCITIES, 0.0, 0.0);
   delay(I2CRequestTimeout_);
 
-  /* NOTE: Motor board expects [deg/sec]. 
+  /* NOTE: Motor board expects [deg/sec].
    */
   if(I2C_->receiveMessage(&I2CBuffer_)) {
     v_.fval = I2CBuffer_.data_[0].fval;
@@ -1046,7 +1053,7 @@ bool GRITSBotMain::sampleMotorBoardAverageRPS(float& rpsL, float& rpsR) {
 bool GRITSBotMain::sampleMotorBoardAverageTemperatures(float& tempL, float& tempR) {
   I2C_->sendMessage(MSG_GET_AVG_TEMPERATURES, 0.0, 0.0);
   delay(I2CRequestTimeout_);
-  
+
   if(I2C_->receiveMessage(&I2CBuffer_)) {
     tempL = I2CBuffer_.data_[0].fval;
     tempR = I2CBuffer_.data_[1].fval;
@@ -1070,7 +1077,7 @@ bool GRITSBotMain::sampleMotorBoardAverageCurrents(float& curL, float& curR) {
 }
 
 bool GRITSBotMain::testMotorBoardI2CCommunications() {
-  /* This function checks if I2C communication between motor and main 
+  /* This function checks if I2C communication between motor and main
    * board works correctly by sending 2 float values and checking their return
    * values for a match
    */
@@ -1153,7 +1160,7 @@ void GRITSBotMain::rainbow(uint8_t wait, uint8_t repetitions) {
   }
 }
 
-/* Taken from Adafruit's NeoPixel library 
+/* Taken from Adafruit's NeoPixel library
  * Input a value 0 to 255 to get a color value.
  * The colours are a transition r - g - b - back to r.
  */

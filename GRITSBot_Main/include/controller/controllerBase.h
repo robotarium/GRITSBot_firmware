@@ -1,15 +1,15 @@
 #ifndef _CONTROLLER_BASE_H_
 #define _CONTROLLER_BASE_H_
 
-#include <include/utilities/constants.h>
-#include <include/utilities/state.h>
+#include <GRITSBot_Main/include/utilities/constants.h>
+#include <GRITSBot_Main/include/utilities/state.h>
 
 class ControllerBase {
   public:
     /* Constructor */
     ControllerBase() {
-    	v_ = 0; 
-    	w_ = 0; 
+    	v_ = 0;
+    	w_ = 0;
     	l_ = ctrl::L;
     }
 
@@ -34,7 +34,7 @@ class ControllerBase {
       }
     }
 
-    /* Virtual update function to be implemented in 
+    /* Virtual update function to be implemented in
      * every derived class
      */
     virtual void update(State state) {}

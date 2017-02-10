@@ -1,11 +1,11 @@
 #ifndef _CONTROLLER_TARGET_H_
 #define _CONTROLLER_TARGET_H_
 
-#include "include/controller/controllerBase.h"
+#include "controllerBase.h"
 #include <math.h>
 
 class ControllerTarget : public ControllerBase {
-  public: 
+  public:
     /* Constructors */
     ControllerTarget(float k = ctrl::K) {
       k_ = k;
@@ -26,7 +26,7 @@ class ControllerTarget : public ControllerBase {
 
     /* Getters */
     State getTargetPosition() {return targetPosition_;}
-    
+
     /* Setters */
     void  setTargetPosition(State targetPosition) {
       targetPosition_ = targetPosition;
@@ -37,7 +37,7 @@ class ControllerTarget : public ControllerBase {
       /* NOTE: v ... [m/sec]
        *       w ... [rad/sec]
        */
-    
+
       /* Allow WiFi stack to execute */
       yield();
 
@@ -52,7 +52,7 @@ class ControllerTarget : public ControllerBase {
         w_  = ( sin(-state.theta) * vx + cos(-state.theta) * vy ) / l_;
       }
     }
-    
+
     float distanceToTarget(State state) {
     	return (state - targetPosition_).norm();
     }

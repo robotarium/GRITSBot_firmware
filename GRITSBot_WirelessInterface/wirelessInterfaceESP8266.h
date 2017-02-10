@@ -1,13 +1,13 @@
 /*
  -------------------------------------------------------------------------------
  Wireless Interface Class for the ESP8266 WiFi Module
- 
+
  METHODS:
 
- NOTES: 
- 
+ NOTES:
+
  EXAMPLES:
- 
+
  Initially created by Daniel Pickem 6/15/15.
  -------------------------------------------------------------------------------
  */
@@ -24,10 +24,10 @@
 #include <IPAddress.h>
 
 /* WiFi authentication data */
-#include "wifiConfig.h"
+#include "GRITSBot_WiFiConfig/wifiConfig.h"
 
 /* Include message definitions */
-#include "GRITSBot_Messages.h"
+#include "GRITSBot_Messages/GRITSBot_Messages.h"
 
 /* Include low-level ESP8266 functions */
 extern "C" {
@@ -97,14 +97,14 @@ class WirelessInterfaceESP8266 {
     bool      sendUdpPacket(String msg);
     int8_t    receiveUdpPacket();
 
-    void      processHostIP(String IP_msg); 
+    void      processHostIP(String IP_msg);
     IPAddress parseIPString(String ip);
-    void      processWirelessParameters(String hostIP, 
-                                        int incomingPort, 
+    void      processWirelessParameters(String hostIP,
+                                        int incomingPort,
                                         int outgoingPort);
 
   //--------------------------------------------------------------------------
-  // Public Member Variables 
+  // Public Member Variables
   //--------------------------------------------------------------------------
   public:
     WiFiClient* wifiClient_;
