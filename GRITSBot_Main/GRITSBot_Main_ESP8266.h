@@ -241,6 +241,7 @@ class GRITSBotMain {
     uint32_t lastEstimatorUpdate_;
     uint32_t lastControllerUpdate_;
     uint32_t lastMessage_;
+    uint32_t messageCounter_;
     uint32_t lastHeartbeat_;
     uint32_t lastRFMessage_;
     uint32_t lastCurrentMeasurement_;

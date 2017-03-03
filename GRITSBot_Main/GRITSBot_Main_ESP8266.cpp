@@ -236,6 +236,7 @@ void GRITSBotMain::updateWireless() {
     if(radio_->receiveMessage() > 0) {
       /* Update time stamp of last message */
       lastMessage_ = millis();
+      messageCounter_ = messageCounter_ + 1;
 
       /* Visual output */
       toggleLed();
@@ -548,6 +549,7 @@ void GRITSBotMain::sendHeartbeatMessage() {
        * 7. I_left_avg      ... average left motor current        [A]
        * 8. I_right_avg     ... average right motor current       [A]
        * 9. V_5V            ... step-up converter output voltage  [V]
+       * 10. messageCounter ... number of messages received/sec   [/sec]
        */
       /* Update battery voltage and current values */
       batteryVoltage_ = ina219_->getBusVoltage_V();
@@ -572,9 +574,9 @@ void GRITSBotMain::sendHeartbeatMessage() {
       float voltageStepUp = getStepUpVoltage();
 
       /* Create heartbeat message */
-      String fields[10]  = {"msgType", "vBat", "iBat", "rpsL", "rpsR", "tempL", "tempR", "iMotorL", "iMotorR", "vBoost"};
-      float data[10]     = {MSG_HEARTBEAT, batteryVoltage_, current_.getAverage(),
-                            rpsL, rpsR, tempL, tempR, curL, curR, voltageStepUp};
+      String fields[11]  = {"msgType", "vBat", "iBat", "rpsL", "rpsR", "tempL", "tempR", "iMotorL", "iMotorR", "vBoost"};
+      float data[11]     = {MSG_HEARTBEAT, batteryVoltage_, current_.getAverage(),
+                            rpsL, rpsR, tempL, tempR, curL, curR, voltageStepUp,messageCounter_};
 
       /* Send heartbeat message via UDP */
       JSONSendMessage(fields, data, 10);
@@ -582,6 +584,9 @@ void GRITSBotMain::sendHeartbeatMessage() {
 
     /* Update timestamp */
     lastHeartbeat_ = millis();
+
+    /* Reset the message counter */
+    messageCounter_ = 0;
 
     /* Visual output */
     toggleLed();
