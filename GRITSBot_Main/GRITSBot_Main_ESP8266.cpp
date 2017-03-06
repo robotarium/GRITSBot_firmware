@@ -67,7 +67,8 @@ void GRITSBotMain::initialize() {
   /* Initialize radio */
   radio_->initialize();
   Serial.println("Mainboard radio initialized");
-
+  /* Initialize the message counter */
+   messageCounter_ = 0;
   /* Set up mainboard as I2C master */
   I2C_->initialize(2, 14);
 
@@ -574,12 +575,12 @@ void GRITSBotMain::sendHeartbeatMessage() {
       float voltageStepUp = getStepUpVoltage();
 
       /* Create heartbeat message */
-      String fields[11]  = {"msgType", "vBat", "iBat", "rpsL", "rpsR", "tempL", "tempR", "iMotorL", "iMotorR", "vBoost"};
+      String fields[11]  = {"msgType", "vBat", "iBat", "rpsL", "rpsR", "tempL", "tempR", "iMotorL", "iMotorR", "msgRecRate", "vBoost"};
       float data[11]     = {MSG_HEARTBEAT, batteryVoltage_, current_.getAverage(),
-                            rpsL, rpsR, tempL, tempR, curL, curR, voltageStepUp,messageCounter_};
+                            rpsL, rpsR, tempL, tempR, curL, curR, (float) messageCounter_, voltageStepUp};
 
       /* Send heartbeat message via UDP */
-      JSONSendMessage(fields, data, 10);
+      JSONSendMessage(fields, data, 11);
     }
 
     /* Update timestamp */
@@ -641,7 +642,7 @@ void GRITSBotMain::sendRFMessage() {
 void GRITSBotMain::JSONSendMessage(String* fields, float* data, int len) {
   /* Create JSON buffer */
   yield();
-  StaticJsonBuffer<256> jsonBuffer;
+  StaticJsonBuffer<400> jsonBuffer;
 
   /* Create JSON root object */
   JsonObject& root = jsonBuffer.createObject();

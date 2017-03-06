@@ -56,8 +56,7 @@ bool WirelessInterfaceESP8266::initialize(){
       Serial.print("Local IP: "); Serial.println(WiFi.localIP());
       Serial.print("Listening on UDP port: "); Serial.println(portIncoming_);
     }
-  /* Initialize the message counter */
-  messageCounter_ = 0;
+  
 
     return true;
   }
