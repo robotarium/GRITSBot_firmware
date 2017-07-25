@@ -1,9 +1,9 @@
 /*
  -------------------------------------------------------------------------------
  GRITSBot Motor Board class
- 
+
  Initially created by Daniel Pickem 7/18/14.
- 
+
  Version 7.0
  -------------------------------------------------------------------------------
  */
@@ -12,7 +12,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "GRITSBot_Motor.h"
-  
+
 // Constructors
 GRITSBotMotor::GRITSBotMotor() {}
 
@@ -37,7 +37,7 @@ void GRITSBotMotor::initialize(uint8_t address) {
     i2c_.initialize();
   }
 
-  /* Register onRequest and onReceive events in the setup function of 
+  /* Register onRequest and onReceive events in the setup function of
    * the main file. See the example files for this library
    */
 
@@ -61,8 +61,8 @@ void GRITSBotMotor::initialize(uint8_t address) {
   setStepsPerRevolution(STEPS_PER_REVOLUTION);
 
   /* Set firmware and hardware version */
-  setFirmwareVersion(FIRMWARE_VERSION); 
-  setHardwareVersion(HARDWARE_VERSION); 
+  setFirmwareVersion(FIRMWARE_VERSION);
+  setHardwareVersion(HARDWARE_VERSION);
 }
 
 //------------------------------------------------------------------------------
@@ -95,7 +95,7 @@ void GRITSBotMotor::setVelocities(float v, float w) {
   setRPS(rpsLeft_, rpsRight_);
 
   /* Add measurement data every time velocities are update */
-  collectData(); 
+  collectData();
 }
 
 void GRITSBotMotor::setVelocitiesMax(float vMax, float wMax) {
@@ -109,10 +109,10 @@ void GRITSBotMotor::setVelocitiesMax(float vMax, float wMax) {
 void GRITSBotMotor::setRPS(float rpsLeft, float rpsRight) {
   rpsLeft_  = rpsLeft;
   rpsRight_ = rpsRight;
-  
+
   /* Vector scale rps values if they exceed maximum allowed rps */
   float maxRpsCurrent = max(abs(rpsLeft_), abs(rpsRight_));
-  if(maxRpsCurrent > rpsMax_) { 
+  if(maxRpsCurrent > rpsMax_) {
     float scale = rpsMax_ / maxRpsCurrent;
 
     rpsLeft_  *= scale;
@@ -163,7 +163,7 @@ void GRITSBotMotor::saturateVelocities() {
     v_ *= scaleV;
     w_ *= scaleV;
   }
-  
+
   if(abs(w_) > abs(wMax_)) {
     scaleW = abs(wMax_ / w_);
     v_ *= scaleW;
@@ -192,15 +192,15 @@ void GRITSBotMotor::requestEvent() {
       i2c_.sendMessage(MSG_GET_RPS_MAX, rpsMax_, rpsMax_);
       break;
     case(MSG_GET_AVG_RPS):
-      i2c_.sendMessage(MSG_GET_AVG_RPS, rpsLeftAvg_.getAverage(), 
+      i2c_.sendMessage(MSG_GET_AVG_RPS, rpsLeftAvg_.getAverage(),
                                         rpsRightAvg_.getAverage());
       break;
     case(MSG_GET_AVG_TEMPERATURES):
-      i2c_.sendMessage(MSG_GET_AVG_TEMPERATURES, tempLeftAvg_.getAverage(), 
+      i2c_.sendMessage(MSG_GET_AVG_TEMPERATURES, tempLeftAvg_.getAverage(),
                                                  tempRightAvg_.getAverage());
       break;
     case(MSG_GET_AVG_CURRENTS):
-      i2c_.sendMessage(MSG_GET_AVG_CURRENTS, currentLeftAvg_.getAverage(), 
+      i2c_.sendMessage(MSG_GET_AVG_CURRENTS, currentLeftAvg_.getAverage(),
                                              currentRightAvg_.getAverage());
       break;
     case(MSG_GET_FIRMWARE_VERSION):
@@ -210,7 +210,7 @@ void GRITSBotMotor::requestEvent() {
       i2c_.sendMessage(MSG_GET_FIRMWARE_VERSION, getHardwareVersion(), 0.0);
       break;
     case(MSG_ECHO):
-      i2c_.sendMessage(MSG_ECHO, I2CBuffer_.data_[0].fval, 
+      i2c_.sendMessage(MSG_ECHO, I2CBuffer_.data_[0].fval,
                                  I2CBuffer_.data_[1].fval);
       break;
     default:
@@ -225,11 +225,11 @@ void GRITSBotMotor::requestEvent() {
 }
 
 void GRITSBotMotor::receiveEvent() {
-  /* Receive 1 uint8_t value and 2 or 3 float values 
+  /* Receive 1 uint8_t value and 2 or 3 float values
    * representing the following
    * 1 ... message type [uint8_t]
-   * 2 ... data field 1 [float] 
-   * 3 ... data field 2 [float] 
+   * 2 ... data field 1 [float]
+   * 3 ... data field 2 [float]
    * 4 ... data field 3 [float] (might not be necessary)
    */
 
@@ -381,7 +381,7 @@ void GRITSBotMotor::stepLeft() {
       /* Update lastStepLeft_ variable */
       lastStepLeft_ = micros();
 
-      /* Execute step 
+      /* Execute step
        * NOTE: This switch-statement executes the step sequence required
        * 			 for bipolar stepper motors with 8 steps per step sequence.
        */
@@ -457,7 +457,7 @@ void GRITSBotMotor::stepRight() {
       /* Update lastStepLeft_ variable */
       lastStepRight_ = micros();
 
-      /* Execute step 
+      /* Execute step
        * NOTE: This switch-statement executes the step sequence required
        * 			 for bipolar stepper motors with 8 steps per step sequence.
        */
@@ -563,8 +563,8 @@ void GRITSBotMotor::stopMotorRight() {
 // Sleep functions
 //------------------------------------------------------------------------------
 void GRITSBotMotor::enableDeepSleep() {
-  /* NOTE: This function activates deep sleep without any 
-   *       wakeup interrupts. This function is meant to be used 
+  /* NOTE: This function activates deep sleep without any
+   *       wakeup interrupts. This function is meant to be used
    *       as a last resort when battery voltage drops too far.
    * NOTE: Enabling deep sleep mode reduces power consumption of the
    *       motor board to ~5 mA
@@ -587,14 +587,14 @@ void GRITSBotMotor::enableDeepSleep() {
   /* Power down motors */
   stopMotors();
 
-  /* Put the device to sleep. The program would continue execution from 
+  /* Put the device to sleep. The program would continue execution from
    * here, if an interrupt triggered a wake up.
    */
-  sleep_mode(); 
+  sleep_mode();
 }
 
 void GRITSBotMotor::enableDeepSleep(uint32_t sec) {
-  /* Use watchdog timer to sleep multiples of 8 sec at a time 
+  /* Use watchdog timer to sleep multiples of 8 sec at a time
    * Note: See http://forum.arduino.cc/index.php?topic=173850.0
    */
   /* Compute sleep times */
@@ -631,7 +631,7 @@ void GRITSBotMotor::sleepNSec(const byte interval) {
   //  4 seconds: 0b100000
   //  8 seconds: 0b100001
 
-  /* Configure watch dog timer 
+  /* Configure watch dog timer
    * NOTE: This timer can measure the longest duration (8 sec)
    */
   MCUSR   = 0;                      // reset various flags
@@ -648,7 +648,7 @@ void GRITSBotMotor::sleepNSec(const byte interval) {
   stopMotors();
 
   /* Set sleep parameters */
-  set_sleep_mode (SLEEP_MODE_PWR_DOWN); 
+  set_sleep_mode (SLEEP_MODE_PWR_DOWN);
 
   /* Enable sleep mode and wait for watchdog interrupt */
   sleep_mode();
@@ -682,6 +682,10 @@ void GRITSBotMotor::collectData() {
    * www.diodes.com/_files/datasheets/ZXCT1009.pdf
    */
   /* Update average motor velocities */
+
+  /* (PAUL): TODO: Add NaN check to all values
+  */
+
   rpsLeftAvg_.addData(rpsLeft_);
   rpsRightAvg_.addData(rpsRight_);
 
@@ -745,7 +749,7 @@ bool GRITSBotMotor::setHardwareVersion(uint32_t version) {
 uint32_t GRITSBotMotor::getFirmwareVersion() {
   uint32_t version;
   uint8_t i = EEPROM_readAnything(FIRMWARE_ADDRESS, version);
-  
+
   if(i > 0) {
     return version;
   } else {
@@ -756,7 +760,7 @@ uint32_t GRITSBotMotor::getFirmwareVersion() {
 uint32_t GRITSBotMotor::getHardwareVersion() {
   uint32_t version;
   uint8_t i = EEPROM_readAnything(HARDWARE_ADDRESS, version);
-  
+
   if(i > 0) {
     return version;
   } else {

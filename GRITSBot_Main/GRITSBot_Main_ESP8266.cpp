@@ -392,6 +392,14 @@ bool GRITSBotMain::processUDPMessage() {
           }
           break;
         }
+      case (MSG_SET_RAINBOW):
+        {
+          uint16_t duration;
+          if (JSONGetNumber<uint16_t>(root,"duration",duration)) {
+            rainbow(duration);
+            disableLedsRGB();
+          }
+        }
       case(MSG_SET_LED_RGB_EFFECT):
         {
           uint16_t reps;
@@ -407,6 +415,38 @@ bool GRITSBotMain::processUDPMessage() {
 
           }
         }
+	  case(MSG_INTERPOLATE_COLORS):
+		{
+			  uint16_t duration;
+		      float frequency;
+			  uint8_t color1[3] = {0, 0, 0}, color2[3] = {255, 255, 255},
+			  		  r1, g1,b1, r2, g2, b2;
+			  if(JSONGetNumber<uint16_t>(root, "d", duration)) {
+			  	  if(JSONGetNumber<float>(root, "f", frequency)) {
+			  		  if(JSONGetNumber<uint8_t>(root, "R1", r1)) {
+			  			  if(JSONGetNumber<uint8_t>(root, "G1", g1)) {
+			  				  if(JSONGetNumber<uint8_t>(root, "B1", b1)) {
+			  					  if(JSONGetNumber<uint8_t>(root, "R2", r2)) {
+			  						  if(JSONGetNumber<uint8_t>(root, "G2", g2)) {
+			  							  if(JSONGetNumber<uint8_t>(root, "B2", b2)) {
+			  								  color1[0] = r1;
+			  								  color1[1] = g1;
+			  								  color1[2] = b1;
+			  								  color2[0] = r2;
+			  								  color2[1] = g2;
+			  								  color2[2] = b2;
+			  								  setGTColor(duration, frequency, color1, color2);
+			  					              disableLedsRGB();
+			  							  }
+			  						  }
+			  					  }
+			  				  }
+			  			  }
+			  		  }
+			  	  }
+			  }
+		  break;
+		}
       case(MSG_GET_BATT_VOLT):
       	{
 		      String fields[3] = {"msgType", "vBat", "iBat"};
@@ -574,13 +614,15 @@ void GRITSBotMain::sendHeartbeatMessage() {
       /* Update step-up converter voltage */
       float voltageStepUp = getStepUpVoltage();
 
+      float isChargingVal = (float) isCharging();
+
       /* Create heartbeat message */
-      String fields[11]  = {"msgType", "vBat", "iBat", "rpsL", "rpsR", "tempL", "tempR", "iMotorL", "iMotorR", "msgRecRate", "vBoost"};
-      float data[11]     = {MSG_HEARTBEAT, batteryVoltage_, current_.getAverage(),
-                            rpsL, rpsR, tempL, tempR, curL, curR, (float) messageCounter_, voltageStepUp};
+      String fields[12]  = {"msgType", "vBat", "iBat", "rpsL", "rpsR", "tempL", "tempR", "iMotorL", "iMotorR", "msgRecRate", "vBoost", "charging"};
+      float data[12]     = {MSG_HEARTBEAT, batteryVoltage_, current_.getAverage(),
+                            rpsL, rpsR, tempL, tempR, curL, curR, (float) messageCounter_, voltageStepUp, isChargingVal};
 
       /* Send heartbeat message via UDP */
-      JSONSendMessage(fields, data, 11);
+      JSONSendMessage(fields, data, 12);
     }
 
     /* Update timestamp */
@@ -1164,6 +1206,24 @@ void GRITSBotMain::rainbow(uint8_t wait, uint8_t repetitions) {
       delay(wait);
     }
   }
+}
+
+void GRITSBotMain::setGTColor(uint16_t duration, float frequency, uint8_t color1[3], uint8_t color2[3]) {
+	uint32_t color[3] = {0, 0, 0};
+	uint32_t strip_color;
+	uint32_t start_time = millis();
+	uint32_t t = 0;
+	float lambda = 0;
+	while ( t < duration*1000 ) {
+		t = millis()-start_time;
+		lambda = 0.5+0.5*sin(2*3.14*frequency*float(t)/1000);
+		color[0] = uint32_t(color1[0] + lambda * (color2[0]-color1[0]));
+		color[1] = uint32_t(color1[1] + lambda * (color2[1]-color1[1]));
+		color[2] = uint32_t(color1[2] + lambda * (color2[2]-color1[2]));
+		strip_color = strip_->Color(color[0], color[1], color[2]);
+		setLedsRGB(strip_color);
+		delay(10);
+	}
 }
 
 /* Taken from Adafruit's NeoPixel library

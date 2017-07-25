@@ -38,6 +38,8 @@
 #define MSG_SET_STEPS_PER_REV     12
 #define MSG_UPDATE_ESTIMATOR      13
 #define MSG_UPDATE_DYNAMICS       14
+#define MSG_INTERPOLATE_COLORS    18
+#define MSG_SET_RAINBOW           19
 
 /* Individual get messages */
 #define MSG_GET_CURRENT_POSE      20
