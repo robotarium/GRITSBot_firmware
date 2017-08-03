@@ -1,13 +1,13 @@
 /*
  -------------------------------------------------------------------------------
  Wireless Interface Class for the ESP8266 WiFi Module
- 
+
  METHODS:
 
- NOTES: 
- 
+ NOTES:
+
  EXAMPLES:
- 
+
  Initially created by Daniel Pickem 6/19/15.
  -------------------------------------------------------------------------------
  */
@@ -50,13 +50,13 @@ bool WirelessInterfaceESP8266::initialize(){
   WiFi.setAutoReconnect(true);
 
   if(WiFi.status() == WL_CONNECTED) {
-    /* Start listening for UDP packages */  
+    /* Start listening for UDP packages */
     if(udp_.begin(portIncoming_)) {
       Serial.print("Connected AP: "); Serial.println(wifiConfig::wifiSSID);
       Serial.print("Local IP: "); Serial.println(WiFi.localIP());
       Serial.print("Listening on UDP port: "); Serial.println(portIncoming_);
     }
-  
+
 
     return true;
   }
@@ -66,7 +66,6 @@ bool WirelessInterfaceESP8266::switchAP(String SSID, String password) {
   /* Disconnect from current AP if any */
   WiFi.disconnect();
 
-  /* Connect to access point defined in wifiConfig */
   Serial.print("Connecting to WiFi SSID: "); Serial.println(SSID);
   Serial.print("Connecting using PW: "); Serial.println(password);
 
@@ -91,7 +90,7 @@ bool WirelessInterfaceESP8266::switchAP(String SSID, String password) {
 
   /* Restart UDP service */
   if(WiFi.status() == WL_CONNECTED) {
-    /* Start listening for UDP packages */  
+    /* Start listening for UDP packages */
     if(udp_.begin(portIncoming_)) {
       Serial.print("Connected AP: "); Serial.println(SSID);
       Serial.print("Listening on UDP port: "); Serial.println(portIncoming_);
@@ -123,10 +122,10 @@ void WirelessInterfaceESP8266::setPortIncoming(uint16_t port) {
   delay(250);
 
   if(udp_.begin(portIncoming_)) {
-    Serial.print("Listening on UDP port: "); 
+    Serial.print("Listening on UDP port: ");
     Serial.println(portIncoming_);
   } else {
-    Serial.print("Failed to open UDP connection on port: "); 
+    Serial.print("Failed to open UDP connection on port: ");
     Serial.println(portIncoming_);
   }
 }
@@ -134,7 +133,7 @@ void WirelessInterfaceESP8266::setPortIncoming(uint16_t port) {
 void WirelessInterfaceESP8266::setPortOutgoing(uint16_t port) {
   portOutgoing_ = port;
 
-  Serial.print("Sending to UDP port: "); 
+  Serial.print("Sending to UDP port: ");
   Serial.println(portOutgoing_);
 }
 
@@ -144,7 +143,7 @@ void WirelessInterfaceESP8266::setHostIP(String hostIP) {
   hostIPStr_ = hostIP;
   receivedHostIP_ = true;
 
-  Serial.print("Sending to host IP: "); 
+  Serial.print("Sending to host IP: ");
   Serial.println(hostIPStr_);
 }
 
@@ -157,7 +156,19 @@ bool WirelessInterfaceESP8266::setWifiChannel(uint8_t channel) {
     return false;
   }
 }
+/* function to set the new SSID */
+void WirelessInterfaceESP8266::setServerSSID(String ssid) {
+  serverSSID_ = ssid;
+}
+/* function to set the new password */
+void WirelessInterfaceESP8266::setServerPassword(String password) {
+  serverPassword_ = password;
+}
 
+/* disconnects from the gateway AP, and connects to the main server */
+void WirelessInterfaceESP8266::reconnectToMainHost(){
+  switchAP(serverSSID_,serverPassword_);
+}
 /* -----------------------------*/
 /*     Status functions         */
 /* -----------------------------*/
@@ -221,7 +232,7 @@ int8_t WirelessInterfaceESP8266::receiveUdpPacket() {
   /* Parse UDP package */
   int noBytes = udp_.parsePacket();
 
-  if ( noBytes ) { 
+  if ( noBytes ) {
     /* Read UDP package payload into char buffer */
     udp_.read(receiveBuffer_, noBytes); // read the packet into the buffer
 
@@ -247,7 +258,7 @@ void WirelessInterfaceESP8266::processHostIP(String hostIP) {
   hostIP_     = parseIPString(hostIP);
   hostIPStr_  = String(hostIP);
 
-  receivedHostIP_ = true; 
+  receivedHostIP_ = true;
   Serial.print("Host IP is assigned to "); Serial.println(hostIPStr_);
 }
 

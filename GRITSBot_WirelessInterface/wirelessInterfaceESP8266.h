@@ -75,6 +75,9 @@ class WirelessInterfaceESP8266 {
     void setPortOutgoing(uint16_t port);
     void setHostIP(String hostIP);
     bool setWifiChannel(uint8_t channel);
+    void setServerSSID(String ssid);
+    void setServerPassword(String password);
+    void reconnectToMainHost();
 
     /* Get functions */
     uint16_t  getPortIncoming() { return portIncoming_; };
@@ -116,9 +119,10 @@ class WirelessInterfaceESP8266 {
   private:
     IPAddress hostIP_;
     String hostIPStr_;
-
     uint16_t portIncoming_;
     uint16_t portOutgoing_;
+    String serverSSID_;
+    String serverPassword_;
 
     char receiveBuffer_[BUFFER_SIZE];
     char sendBuffer_[BUFFER_SIZE];

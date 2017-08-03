@@ -496,6 +496,7 @@ bool GRITSBotMain::processUDPMessage() {
       	{
 		      /* Parse host IP */
 		      int portIncoming, portOutgoing;
+          String server_SSID, server_password;
 
 		      if(root.containsKey("host")) {
 		        radio_->setHostIP(root["host"].as<String>());
@@ -521,6 +522,13 @@ bool GRITSBotMain::processUDPMessage() {
 		        sendErrorMessage(error);
 		      }
 
+          /* Parse the server SSID and password */
+          server_SSID = JSONGetString(root, "ap");
+		      radio_->setNewSSID(server_SSID);
+
+          server_password = JSONGetString(root, "pass");
+		      radio_->setNewPassword(server_password);
+
 		      /* Send status message based on EEPROM sleep flag */
 		      bool sleepFlag = EEPROM.read(0);
 		      if(sleepFlag) {
@@ -534,6 +542,10 @@ bool GRITSBotMain::processUDPMessage() {
 		        sendStatusMessage("powered up");
 		      }
 
+          /* Disconnect from ap_setup and connect to server_SSID. */
+          radio_->reconnectToMainHost();
+          rainbow(10,1); // a LED rainbow to indicate new connection successful.
+          disableLedsRGB();
 		      break;
         }
       case(MSG_DEEP_SLEEP):
