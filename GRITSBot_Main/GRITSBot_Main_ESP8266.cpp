@@ -189,6 +189,7 @@ void GRITSBotMain::updateMeasurements() {
       if(isCharging()) {
         /* Charger is now connected */
         sendStatusMessage("charging", String(batteryVoltage_));
+        setChargingLed(); // turn on an RGB LED to indicate charging
       } else {
         /* Charger is now disconnected */
         if(!isCharged(true)) {
@@ -196,6 +197,7 @@ void GRITSBotMain::updateMeasurements() {
         } else {
           sendStatusMessage("charged", String(batteryVoltage_));
         }
+        disableLedsRGB(); // turn off RGB LED - no longer charging
       }
     } else {
       /* If no transition is detected, only send a status update once
@@ -240,7 +242,7 @@ void GRITSBotMain::updateWireless() {
       messageCounter_ = messageCounter_ + 1;
 
       /* Visual output */
-      toggleLed();
+      //toggleLed(); // disabling since causing issues with RGB LED illumination
 
       /* Process message */
       yield();
@@ -644,7 +646,7 @@ void GRITSBotMain::sendHeartbeatMessage() {
     messageCounter_ = 0;
 
     /* Visual output */
-    toggleLed();
+    //toggleLed(); // disabling since causing issues with RGB LED illumination
   }
 }
 
@@ -1217,6 +1219,15 @@ void GRITSBotMain::rainbow(uint8_t wait, uint8_t repetitions) {
       strip_->show();
       delay(wait);
     }
+  }
+}
+
+void GRITSBotMain::setChargingLed() {
+  uint8_t color[3] = {254,0,0};
+  uint32_t strip_color;
+  if (isCharging()){
+    strip_color = strip_->Color(color[0], color[1], color[2]);
+    setLedRGB(1,strip_color);
   }
 }
 
