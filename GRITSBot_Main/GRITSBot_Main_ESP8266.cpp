@@ -197,7 +197,7 @@ void GRITSBotMain::updateMeasurements() {
         } else {
           sendStatusMessage("charged", String(batteryVoltage_));
         }
-        disableLedsRGB(); // turn off RGB LED - no longer charging
+        disableLedsRGB(); // turn off RGB LED - no longer on charger
       }
     } else {
       /* If no transition is detected, only send a status update once
@@ -208,7 +208,7 @@ void GRITSBotMain::updateMeasurements() {
         if(isCharged()) {
           if( (millis() - lastChargedStatusMessage_ ) > 2000) {
             sendStatusMessage("charged", String(batteryVoltage_));
-
+            //setChargedLed(); // set RGB LED green if charged and on charger
             /* Update time stamp */
             lastChargedStatusMessage_ = millis();
           }
@@ -526,10 +526,10 @@ bool GRITSBotMain::processUDPMessage() {
 
           /* Parse the server SSID and password */
           server_SSID = JSONGetString(root, "ap");
-		      radio_->setNewSSID(server_SSID);
+		      radio_->setServerSSID(server_SSID);
 
           server_password = JSONGetString(root, "pass");
-		      radio_->setNewPassword(server_password);
+		      radio_->setServerPassword(server_password);
 
 		      /* Send status message based on EEPROM sleep flag */
 		      bool sleepFlag = EEPROM.read(0);
@@ -1226,6 +1226,15 @@ void GRITSBotMain::setChargingLed() {
   uint8_t color[3] = {254,0,0};
   uint32_t strip_color;
   if (isCharging()){
+    strip_color = strip_->Color(color[0], color[1], color[2]);
+    setLedRGB(1,strip_color);
+  }
+}
+
+void GRITSBotMain::setChargedLed() {
+  uint8_t color[3] = {0,254,0};
+  uint32_t strip_color;
+  if (isCharged()){
     strip_color = strip_->Color(color[0], color[1], color[2]);
     setLedRGB(1,strip_color);
   }

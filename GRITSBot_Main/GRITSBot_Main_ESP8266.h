@@ -143,6 +143,7 @@ class GRITSBotMain {
     void rainbow(uint8_t wait, uint8_t repetitions = 1);
 	  void setGTColor(uint16_t duration, float frequency, uint8_t color1[3], uint8_t color2[3]);
     void setChargingLed();
+    void setChargedLed();
     uint32_t Wheel(byte WheelPos);
 
     /* Data collection functions */
