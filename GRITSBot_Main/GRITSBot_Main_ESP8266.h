@@ -18,8 +18,8 @@
 //------------------------------------------------------------------
 // Define firmware and hardware version
 //------------------------------------------------------------------
-#define FIRMWARE_VERSION 20161101
-#define HARDWARE_VERSION 20161020
+#define FIRMWARE_VERSION 20170816
+#define HARDWARE_VERSION 20170816 
 #define FIRMWARE_ADDRESS 10
 #define HARDWARE_ADDRESS 30
 #define DEBUG_LEVEL 1

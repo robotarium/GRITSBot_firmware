@@ -1,6 +1,17 @@
+#include <GRITSBot_Motor.h>
+
+#include <GRITSBot_Motor.h>
+
+#include <GRITSBot_Motor.h>
+
+#include <GRITSBot_Messages.h>
+
+#include <GRITSBot_Motor.h>
+
 /* Include Arduino libraries */
 #include <Arduino.h>
 #include <Wire.h>
+#include <EEPROM.h>
 
 /* Include GRITSBot libraries */
 #include "GRITSBot_Motor.h"

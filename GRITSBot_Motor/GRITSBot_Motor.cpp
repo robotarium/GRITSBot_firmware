@@ -13,6 +13,12 @@
 //------------------------------------------------------------------------------
 #include "GRITSBot_Motor.h"
 
+/* Initializing wheel and Motor related parameters*/
+const float GRITSBotMotor::rWheel_ = 0.005;
+const float GRITSBotMotor::cWheel_ = 0.0314;
+const float GRITSBotMotor::rTrack_ = 0.0175;
+const float GRITSBotMotor::cTrack_ = 0.1100;
+
 // Constructors
 GRITSBotMotor::GRITSBotMotor() {}
 
@@ -221,7 +227,7 @@ void GRITSBotMotor::requestEvent() {
   I2CBuffer_.clear();
 
   /* Visual output */
-  toggleLeds();
+  //toggleLeds();
 }
 
 void GRITSBotMotor::receiveEvent() {
@@ -239,7 +245,7 @@ void GRITSBotMotor::receiveEvent() {
     processI2CMessage(&I2CBuffer_);
 
     /* Visual feedback */
-    toggleLeds();
+    //toggleLeds();
   }
 }
 
@@ -354,6 +360,9 @@ void GRITSBotMotor::nextStepLeft() {
     /* Step count has to be in [1 .. 8] */
     if(curStepLeft_ > 8) { curStepLeft_ = 1; }
   }
+
+  /* Visual Feedback for motion */
+  toggleLeds();
 }
 
 void GRITSBotMotor::nextStepRight() {
@@ -370,6 +379,9 @@ void GRITSBotMotor::nextStepRight() {
     /* Step count has to be in [1 .. 8] */
     if(curStepRight_ > 8) { curStepRight_ = 1; }
   }
+
+  /* Visual Feedback for motion */
+  toggleLeds();
 }
 
 void GRITSBotMotor::stepLeft() {
@@ -377,7 +389,7 @@ void GRITSBotMotor::stepLeft() {
     stopMotorLeft();
   } else {
     /* Check if more than delayLeft_ time has passed since last step */
-    if( (lastStepLeft_ + delayLeft_) < micros()) {
+    if( (micros() - lastStepLeft_) > delayLeft_ ) {
       /* Update lastStepLeft_ variable */
       lastStepLeft_ = micros();
 
@@ -453,7 +465,7 @@ void GRITSBotMotor::stepRight() {
     stopMotorRight();
   } else {
     /* Check if more than delayRight_ time has passed since last step */
-    if( (lastStepRight_ + delayRight_) < micros()) {
+    if( (micros() - lastStepRight_) > delayRight_ ) {
       /* Update lastStepLeft_ variable */
       lastStepRight_ = micros();
 

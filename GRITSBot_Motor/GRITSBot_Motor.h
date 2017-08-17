@@ -1,13 +1,13 @@
 /*
  -------------------------------------------------------------------------------
  GRITSBot Motor Board class
- 
+
  METHODS:
 
  NOTES:
- 
+
  EXAMPLES:
- 
+
  Initially created by Daniel Pickem 7/18/14.
  -------------------------------------------------------------------------------
  */
@@ -35,12 +35,12 @@
 #include "include/utilities/EEPROM_Interface.h"
 
 //------------------------------------------------------------------
-// CPU frequency (8 MHz) 
+// CPU frequency (8 MHz)
 //------------------------------------------------------------------
 #define F_CPU 8000000UL
 
 //------------------------------------------------------------------
-// Macros 
+// Macros
 //------------------------------------------------------------------
 #define sbi(a, b) (a) |= (1 << (b))
 #define cbi(a, b) (a) &= ~(1 << (b))
@@ -54,8 +54,8 @@
 //------------------------------------------------------------------
 // Define firmware version
 //------------------------------------------------------------------
-#define FIRMWARE_VERSION 20161014
-#define HARDWARE_VERSION 20161014
+#define FIRMWARE_VERSION 20170816
+#define HARDWARE_VERSION 20170816
 #define FIRMWARE_ADDRESS 10
 #define HARDWARE_ADDRESS 30
 
@@ -148,7 +148,7 @@ class GRITSBotMotor {
     // Public Member Functions
     //--------------------------------------------------------------
     /* Setup functions */
-    /* Note that address = 2 is the default address for the motor board 
+    /* Note that address = 2 is the default address for the motor board
      * The main board expects that address for communication.
      */
     void initialize(uint8_t address = 2);
@@ -179,7 +179,7 @@ class GRITSBotMotor {
     void ledOnRight();
     void ledOffLeft();
     void ledOffRight();
-    
+
     /* Status functions */
     bool isMaster() { return i2c_.isMaster(); };
 
@@ -231,15 +231,15 @@ class GRITSBotMotor {
     //--------------------------------------------------------------
     // Private Member Variables
     //--------------------------------------------------------------
-    /* Wheel and robot parameters 
+    /* Wheel and robot parameters
      * 		wheel radius ... 5 mmm
      * 		wheel base   ... 35 mm
      */
     float rpsMax_;
-    const float rWheel_ = 0.005;
-    const float cWheel_ = 0.0314;
-    const float rTrack_ = 0.0175;
-    const float cTrack_ = 0.1100;
+    static const float rWheel_;
+    static const float cWheel_;
+    static const float rTrack_;
+    static const float cTrack_;
     uint16_t    stepsPerRevolution_;
 
     /* Velocities */
@@ -249,7 +249,7 @@ class GRITSBotMotor {
     float w_;
     float vMax_;
     float wMax_;
-    
+
     /* Motor control parameters */
     unsigned long delayLeft_;
     unsigned long delayRight_;
