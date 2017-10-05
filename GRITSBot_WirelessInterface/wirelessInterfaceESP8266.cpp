@@ -37,6 +37,11 @@ bool WirelessInterfaceESP8266::initialize(){
   /* Connect to access point defined in wifiConfig */
   Serial.print("Connecting to WiFi SSID: "); Serial.println(wifiConfig::wifiSSID);
   Serial.print("Connecting using PW: "); Serial.println(wifiConfig::wifiPassword);
+
+  /* Set WiFi in Station mode */
+  WiFi.mode(WIFI_STA);
+
+  /* Connect to configured AP */
   WiFi.begin(wifiConfig::wifiSSID, wifiConfig::wifiPassword);
 
   int tries = 0;
@@ -75,8 +80,11 @@ bool WirelessInterfaceESP8266::switchAP(String SSID, String password) {
   char pwChar[sizeof(char) * (password.length() + 1)];
   password.toCharArray(pwChar, sizeof(char) * (password.length() + 1));
 
-  /* Connect to new access point */
-  WiFi.begin(SSIDChar, pwChar);
+  /* Reset ESP8266 in Station Mode */
+  WiFi.mode(WIFI_STA);
+
+  /* Connect to new access point with the channel specified */
+  WiFi.begin(SSIDChar, pwChar, wifiChannel_);
 
   int tries = 0;
   while (WiFi.status() != WL_CONNECTED) {
@@ -94,6 +102,7 @@ bool WirelessInterfaceESP8266::switchAP(String SSID, String password) {
     if(udp_.begin(portIncoming_)) {
       Serial.print("Connected AP: "); Serial.println(SSID);
       Serial.print("Listening on UDP port: "); Serial.println(portIncoming_);
+      Serial.printf("BSSID: %s\n", WiFi.BSSIDstr().c_str());
     }
 
     return true;
@@ -106,7 +115,7 @@ void WirelessInterfaceESP8266::sendMessage(String data) {
   sendUdpPacket(data);
 }
 
-int8_t WirelessInterfaceESP8266::receiveMessage(){
+int32_t WirelessInterfaceESP8266::receiveMessage(){
   return receiveUdpPacket();
 };
 
@@ -149,6 +158,7 @@ void WirelessInterfaceESP8266::setHostIP(String hostIP) {
 
 bool WirelessInterfaceESP8266::setWifiChannel(uint8_t channel) {
   if(channel > 0 && channel < 13) {
+    wifiChannel_ = channel;
     wifi_set_channel(channel);
     Serial.print("Switched to channel "); Serial.println(channel);
     return true;
@@ -225,7 +235,7 @@ bool WirelessInterfaceESP8266::sendUdpPacket(String msg) {
   }
 }
 
-int8_t WirelessInterfaceESP8266::receiveUdpPacket() {
+int32_t WirelessInterfaceESP8266::receiveUdpPacket() {
   /* Allow background tasks of WiFi stack to execute */
   yield();
 

@@ -64,7 +64,7 @@ class WirelessInterfaceESP8266 {
     bool switchAP(String SSID, String password);
 
     /* Wireless communication functions */
-    int8_t  receiveMessage();
+    int32_t  receiveMessage();
     void    sendMessage(String data);
 
     /* Status functions */
@@ -98,7 +98,7 @@ class WirelessInterfaceESP8266 {
   private:
     /* Functions handling UDP package translation */
     bool      sendUdpPacket(String msg);
-    int8_t    receiveUdpPacket();
+    int32_t    receiveUdpPacket();
 
     void      processHostIP(String IP_msg);
     IPAddress parseIPString(String ip);
@@ -123,7 +123,7 @@ class WirelessInterfaceESP8266 {
     uint16_t portOutgoing_;
     String serverSSID_;
     String serverPassword_;
-
+    uint8_t wifiChannel_;
     char receiveBuffer_[BUFFER_SIZE];
     char sendBuffer_[BUFFER_SIZE];
 

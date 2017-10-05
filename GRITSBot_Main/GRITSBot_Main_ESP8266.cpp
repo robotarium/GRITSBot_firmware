@@ -257,7 +257,7 @@ bool GRITSBotMain::processUDPMessage() {
   String error;
 
   /* Parse JSON message stored in radio_.msg */
-  StaticJsonBuffer<256> jsonBuffer;
+  StaticJsonBuffer<512> jsonBuffer;
 
   /* Parse JSON data into buffer */
   String msg = radio_->getMessage();
@@ -496,8 +496,8 @@ bool GRITSBotMain::processUDPMessage() {
         }
       case(MSG_HOST_IP):
       	{
-		      /* Parse host IP */
-		      int portIncoming, portOutgoing;
+		      /* Parse host IP, incoming and outgoing ports, and WiFi channel */
+		      int portIncoming, portOutgoing, setChannelTo;
           String server_SSID, server_password;
 
 		      if(root.containsKey("host")) {
@@ -530,6 +530,14 @@ bool GRITSBotMain::processUDPMessage() {
 
           server_password = JSONGetString(root, "pass");
 		      radio_->setServerPassword(server_password);
+
+          /* Set the channel on which the ESP must connect */
+          if(JSONGetNumber<int>(root, "cha", setChannelTo)) {
+		        radio_->setWifiChannel(setChannelTo);
+		      } else {
+		        error = "MSG_HOST_IP: Failed to parse channel number : " + msg;
+		        sendErrorMessage(error);
+		      }
 
 		      /* Send status message based on EEPROM sleep flag */
 		      bool sleepFlag = EEPROM.read(0);
